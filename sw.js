@@ -1,5 +1,5 @@
 // Lamp & Path service worker: keeps the whole app on the device so it opens offline.
-const VERSION = "lamp-tinted-2";
+const VERSION = "lamp-tinted-3";
 const SHELL = [
   "/", "/app.js", "/manifest.webmanifest",
   "/icons/icon-192.png", "/icons/icon.svg", "/icons/icon-maskable.svg", "/icons/apple-touch-icon.png", "/icons/favicon-64.png"
