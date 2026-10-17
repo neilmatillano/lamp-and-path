@@ -100,6 +100,7 @@ const VERSIONS = [["NIV","New International Version"],["ESV","English Standard V
 const BIT = { ot: 1, nt: 2 };
 const LOCAL_KEY = "lamp-path-plan-v1";
 const TAB_KEY = "lamp-path-tab";
+const THEME_KEY = "lamp-path-theme";
 
 /* ---------- dates (calendar days, no time zone drift) ---------- */
 function todayISO() { const d = new Date(); return iso(d.getFullYear(), d.getMonth() + 1, d.getDate()); }
@@ -425,6 +426,34 @@ function renderAll(opts) {
   else if (ui.tab === "schedule") renderSchedule();
   else if (!(opts && opts.keepPlanForm)) renderPlan();
 }
+
+/* ---------- appearance: follow the device, or force light or dark ---------- */
+const THEMES = {
+  system: { next: "light", label: "System", icon: '<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/>' },
+  light: { next: "dark", label: "Light", icon: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>' },
+  dark: { next: "system", label: "Dark", icon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>' }
+};
+const THEME_COLOR = { light: "#F1F3EF", dark: "#111514" };
+function applyTheme(theme) {
+  const root = document.documentElement;
+  if (theme === "system") delete root.dataset.theme; else root.dataset.theme = theme;
+  // a forced theme overrides both media-matched theme-color tags so the browser bar matches
+  for (const m of document.querySelectorAll('meta[name="theme-color"]')) {
+    m.content = theme === "system" ? THEME_COLOR[m.media.includes("dark") ? "dark" : "light"] : THEME_COLOR[theme];
+  }
+  const T = THEMES[theme], btn = document.getElementById("theme-toggle");
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">${T.icon}</svg>`;
+  btn.setAttribute("aria-label", `Appearance: ${T.label}. Switch to ${THEMES[T.next].label}`);
+  btn.title = `Appearance: ${T.label}`;
+}
+let theme = "system";
+try { const t = localStorage.getItem(THEME_KEY); if (t === "light" || t === "dark") theme = t; } catch (e) {}
+applyTheme(theme);
+document.getElementById("theme-toggle").addEventListener("click", () => {
+  theme = THEMES[theme].next;
+  try { if (theme === "system") localStorage.removeItem(THEME_KEY); else localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+  applyTheme(theme);
+});
 
 document.querySelector(".tabs").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (b) showTab(b.dataset.tab); });
 

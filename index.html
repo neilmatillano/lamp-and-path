@@ -14,6 +14,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#F1F3EF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#111514" media="(prefers-color-scheme: dark)">
+<script>try { var t = localStorage.getItem("lamp-path-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,500&amp;family=Alegreya+Sans:wght@400;500;700&amp;display=swap">
@@ -77,6 +78,10 @@ header.top { display: flex; align-items: flex-end; justify-content: space-betwee
 .tabs { display: flex; background: var(--leaf); border: 1px solid var(--rule); border-radius: 999px; padding: 3px; gap: 2px; }
 .tabs button { border: 0; background: none; padding: 6px 14px; border-radius: 999px; font-weight: 500; color: var(--muted); }
 .tabs button[aria-selected="true"] { background: var(--ink); color: var(--paper); }
+.topctl { display: flex; align-items: center; gap: 8px; }
+.theme { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--rule); background: var(--leaf); color: var(--muted); display: grid; place-items: center; padding: 0; }
+.theme:hover { border-color: var(--muted); color: var(--ink); }
+.theme svg { width: 18px; height: 18px; }
 
 /* day header */
 .dayhead { display: flex; flex-direction: column; gap: 4px; }
@@ -236,11 +241,14 @@ footer.foot p { margin: 0; }
 <div class="wrap">
   <header class="top">
     <h1 class="mark">Lamp <em>&amp;</em> Path</h1>
+    <div class="topctl">
     <nav class="tabs" role="tablist" aria-label="Sections">
       <button id="tab-today" role="tab" aria-selected="true" data-tab="today">Today</button>
       <button id="tab-schedule" role="tab" aria-selected="false" data-tab="schedule">Schedule</button>
       <button id="tab-plan" role="tab" aria-selected="false" data-tab="plan">Plan</button>
     </nav>
+    <button class="theme" type="button" id="theme-toggle"></button>
+    </div>
   </header>
   <div class="banner" id="update-banner" hidden role="status"><p>A new version of Lamp &amp; Path is ready.</p><button class="btn primary" type="button" id="update-now">Reload</button></div>
   <div class="banner browser-only" id="install-banner" hidden><p id="install-text">Install Lamp &amp; Path to open it like an app, even offline.</p><span class="actions"><button class="btn primary" type="button" id="install-now">Install</button><button class="btn quiet" type="button" id="install-later">Not now</button></span></div>
