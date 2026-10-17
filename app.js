@@ -102,8 +102,10 @@ function chunk(P, t, d) {
 }
 //</core>
 
-// [Bible Gateway code, name, language of the translation when it isn't English]
-const VERSIONS = [["NIV","New International Version"],["ESV","English Standard Version"],["KJV","King James Version"],["NKJV","New King James Version"],["NLT","New Living Translation"],["CSB","Christian Standard Bible"],["NASB1995","New American Standard 1995"],["RCV","Recovery Version"],["LSG","Louis Segond","fr"],["SG21","Segond 21","fr"],["BDS","Bible du Semeur","fr"],["MBBTAG","Magandang Balita Biblia","tl"],["ADB1905","Ang Dating Biblia","tl"]];
+// [code, name, language]; codes are Bible Gateway's unless the Bible is listed in RCV/YOUVERSION below
+const VERSIONS = [["NIV","New International Version","en"],["ESV","English Standard Version","en"],["KJV","King James Version","en"],["NKJV","New King James Version","en"],["NLT","New Living Translation","en"],["CSB","Christian Standard Bible","en"],["NASB1995","New American Standard 1995","en"],["RCV","Recovery Version","en"],
+  ["LSG","Louis Segond 1910","fr"],["NEG1979","Nouvelle Édition de Genève 1979","fr"],["SG21","Segond 21","fr"],["NBS","Nouvelle Bible Segond","fr"],["NVS78P","Nouvelle Segond révisée","fr"],["BDS","Bible du Semeur","fr"],["BFC","Bible en français courant","fr"],["NFC","Nouvelle Français courant","fr"],["PDV2017","Parole de Vie 2017","fr"],["JND","Bible J.N. Darby","fr"],["FMAR","Martin 1744","fr"],["OST","Ostervald","fr"],["BCC1923","Bible catholique Crampon 1923","fr"],
+  ["MBBTAG","Magandang Balita Biblia","tl"],["ADB1905","Ang Dating Biblia","tl"]];
 const BIT = { ot: 1, nt: 2 };
 const LOCAL_KEY = "lamp-path-plan-v1";
 const TAB_KEY = "lamp-path-tab";
@@ -123,7 +125,7 @@ const I18N = {
     sync: "Your progress is saved on this device and works offline. Use Settings › Backup to move it to another device.",
     counts: "Verse counts follow modern English Bibles such as the NIV and ESV: 23,145 Old Testament and 7,958 New Testament verses.",
     tname: { ot: "Old Testament", nt: "New Testament" },
-    langs: { fr: "French", tl: "Tagalog" },
+    langs: { en: "English", fr: "French", tl: "Tagalog" },
     finished: t => `${I18N.en.tname[t]} finished`,
     noReading: t => `No ${I18N.en.tname[t]} reading`,
     passLong: n => `${n === 2 ? "2nd" : n === 3 ? "3rd" : n + "th"} time through`,
@@ -182,7 +184,7 @@ const I18N = {
     sync: "Votre progression est enregistrée sur cet appareil et fonctionne hors ligne. Utilisez Réglages › Sauvegarde pour la transférer sur un autre appareil.",
     counts: "Le nombre de versets suit les Bibles anglaises modernes comme la NIV et l’ESV : 23 145 versets dans l’Ancien Testament et 7 958 dans le Nouveau.",
     tname: { ot: "Ancien Testament", nt: "Nouveau Testament" },
-    langs: { fr: "français", tl: "tagalog" },
+    langs: { en: "Anglais", fr: "Français", tl: "Tagalog" },
     finished: t => `${I18N.fr.tname[t]} terminé`,
     noReading: t => t === "ot" ? "Aucune lecture de l’Ancien Testament" : "Aucune lecture du Nouveau Testament",
     passLong: n => `${n}e passage`,
@@ -237,7 +239,11 @@ try { const l = localStorage.getItem(LANG_KEY); lang = l === "fr" || l === "en" 
 let L = I18N[lang];
 const TNAME = { get ot() { return L.tname.ot; }, get nt() { return L.tname.nt; } };
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
-function versionName([k, n, tag]) { return tag ? `${n} (${L.langs[tag]})` : n; }
+// the Bible picker, grouped by language with the app's own language first
+function versionOptions(sel) {
+  const order = ["en", "fr", "tl"].sort((a, b) => (b === lang) - (a === lang));
+  return order.map(g => `<optgroup label="${L.langs[g]}">${VERSIONS.filter(v => v[2] === g).map(([k, n]) => `<option value="${k}" ${k === sel ? "selected" : ""}>${esc(n)}</option>`).join("")}</optgroup>`).join("");
+}
 
 /* ---------- dates (calendar days, no time zone drift) ---------- */
 function todayISO() { const d = new Date(); return iso(d.getFullYear(), d.getMonth() + 1, d.getDate()); }
@@ -329,7 +335,21 @@ function rcvURL(t, c) {
   const slug = NAMES[n] === "Song of Solomon" ? "SongofSongs" : NAMES[n].replace(/ /g, "");
   return `https://text.recoveryversion.bible/${String(n + 1).padStart(2, "0")}_${slug}_${r.c}.htm#${RCV_ABBR[n]}${r.c}-${r.v}`;
 }
-function readingURL(t, c) { return state.settings.version === "RCV" ? rcvURL(t, c) : gatewayURL(c.query); }
+// French Bibles on YouVersion (bible.com): [YouVersion id, numbers Joel and Malachi the Hebrew way]
+const YOUVERSION = { NBS: [104, 1], NVS78P: [2053, 1], BFC: [63, 1], NFC: [2367, 1], PDV2017: [133, 1], JND: [64, 1], FMAR: [62, 0], OST: [131, 0], BCC1923: [504, 1] };
+const USFM = "GEN EXO LEV NUM DEU JOS JDG RUT 1SA 2SA 1KI 2KI 1CH 2CH EZR NEH EST JOB PSA PRO ECC SNG ISA JER LAM EZK DAN HOS JOL AMO OBA JON MIC NAM HAB ZEP HAG ZEC MAL MAT MRK LUK JHN ACT ROM 1CO 2CO GAL EPH PHP COL 1TH 2TH 1TI 2TI TIT PHM HEB JAS 1PE 2PE 1JN 2JN 3JN JUD REV".split(" ");
+function youversionURL(t, c, v) {
+  const [id, hebrew] = YOUVERSION[v], r = locate(t, c.firstIndex), n = (t === "ot" ? 0 : 39) + r.b;
+  let ch = r.c;
+  // these Bibles have no Malachi 4 (it is 3:19–24), and English Joel 2:28–3:21 is their Joel 3–4
+  if (hebrew && USFM[n] === "MAL" && ch === 4) ch = 3;
+  if (hebrew && USFM[n] === "JOL" && (ch === 3 || (ch === 2 && r.v >= 28))) ch += 1;
+  return `https://www.bible.com/bible/${id}/${USFM[n]}.${ch}.${v}`;
+}
+function readingURL(t, c) {
+  const v = state.settings.version;
+  return v === "RCV" ? rcvURL(t, c) : YOUVERSION[v] ? youversionURL(t, c, v) : gatewayURL(c.query);
+}
 
 /* ---------- Today ---------- */
 function stats() {
@@ -508,7 +528,7 @@ function renderPlan(force) {
     </fieldset>
     <fieldset>
       <legend>${L.links}</legend>
-      <div class="field"><label for="version">${L.openIn}</label><select id="version">${VERSIONS.map(v => `<option value="${v[0]}" ${v[0] === S.version ? "selected" : ""}>${esc(versionName(v))}</option>`).join("")}</select></div>
+      <div class="field"><label for="version">${L.openIn}</label><select id="version">${versionOptions(S.version)}</select></div>
     </fieldset>
     <fieldset>
       <legend>${L.backup}</legend>
