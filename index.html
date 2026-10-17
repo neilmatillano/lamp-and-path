@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Lamp &amp; Path</title>
+<title>Le Sentier</title>
 <meta name="description" content="A daily Bible reading plan with an Old and a New Testament passage every day.">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" type="image/png" href="/icons/favicon-64.png">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Lamp &amp; Path">
+<meta name="apple-mobile-web-app-title" content="Le Sentier">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#EDEFEA" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#111513" media="(prefers-color-scheme: dark)">
@@ -32,6 +32,7 @@ body { margin: 0; }
   --muted: #5F6964;
   --rule: #D9DDD6;
   --chip: rgba(27, 31, 29, .07);
+  --brand: #9E7024;
   --rubric: #B4473A;
   --rubric-soft: #F3E0DA;
   --ot: #2D6A4A;
@@ -47,13 +48,13 @@ body { margin: 0; }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --paper: #111513; --glow: rgba(226, 150, 60, .16); --leaf: #1A1F1C; --ink: #ECEEEA; --muted: #9AA39D; --rule: #2A302C; --chip: rgba(255, 255, 255, .07);
-    --rubric: #E58779; --rubric-soft: #3A2421; --ot: #86C9A2; --ot-soft: #18271F; --nt: #A2B5EE; --nt-soft: #1A2134;
+    --brand: #D4A24A; --rubric: #E58779; --rubric-soft: #3A2421; --ot: #86C9A2; --ot-soft: #18271F; --nt: #A2B5EE; --nt-soft: #1A2134;
     --focus: #E58779; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --paper: #111513; --glow: rgba(226, 150, 60, .16); --leaf: #1A1F1C; --ink: #ECEEEA; --muted: #9AA39D; --rule: #2A302C; --chip: rgba(255, 255, 255, .07);
-  --rubric: #E58779; --rubric-soft: #3A2421; --ot: #86C9A2; --ot-soft: #18271F; --nt: #A2B5EE; --nt-soft: #1A2134;
+  --brand: #D4A24A; --rubric: #E58779; --rubric-soft: #3A2421; --ot: #86C9A2; --ot-soft: #18271F; --nt: #A2B5EE; --nt-soft: #1A2134;
   --focus: #E58779; color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -86,7 +87,7 @@ header.top .topctl { grid-area: ctl; }
   header.top { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "mark tabs ctl"; }
   header.top .tabs { justify-self: end; }
 }
-.mark { font-family: var(--display); font-weight: 700; font-size: 1.5rem; line-height: 1; letter-spacing: -0.015em; margin: 0; }
+.mark { color: var(--brand); font-family: var(--display); font-weight: 700; font-size: 1.5rem; line-height: 1; letter-spacing: -0.015em; margin: 0; }
 .mark em { font-style: normal; color: var(--rubric); }
 .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
 .tabs button { border: 0; background: var(--chip); padding: 7px 15px; border-radius: 999px; font-weight: 600; font-size: 0.92rem; color: var(--muted); }
@@ -250,7 +251,7 @@ footer.foot p { margin: 0; }
 <body>
 <div class="wrap">
   <header class="top">
-    <h1 class="mark">Lamp <em>&amp;</em> Path</h1>
+    <h1 class="mark">Le Sentier</h1>
     <nav class="tabs" role="tablist" aria-label="Sections">
       <button id="tab-today" role="tab" aria-selected="true" data-tab="today">Today</button>
       <button id="tab-schedule" role="tab" aria-selected="false" data-tab="schedule">Schedule</button>
@@ -261,8 +262,8 @@ footer.foot p { margin: 0; }
       <button class="theme" type="button" id="theme-toggle"></button>
     </div>
   </header>
-  <div class="banner" id="update-banner" hidden role="status"><p id="update-text">A new version of Lamp &amp; Path is ready.</p><button class="btn primary" type="button" id="update-now">Reload</button></div>
-  <div class="banner browser-only" id="install-banner" hidden><p id="install-text">Install Lamp &amp; Path to open it like an app, even offline.</p><span class="actions"><button class="btn primary" type="button" id="install-now">Install</button><button class="btn quiet" type="button" id="install-later">Not now</button></span></div>
+  <div class="banner" id="update-banner" hidden role="status"><p id="update-text">A new version of Le Sentier is ready.</p><button class="btn primary" type="button" id="update-now">Reload</button></div>
+  <div class="banner browser-only" id="install-banner" hidden><p id="install-text">Install Le Sentier to open it like an app, even offline.</p><span class="actions"><button class="btn primary" type="button" id="install-now">Install</button><button class="btn quiet" type="button" id="install-later">Not now</button></span></div>
 
   <main id="main" style="display:contents">
   <section id="view-today" style="display:grid;gap:22px"></section>

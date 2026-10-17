@@ -117,10 +117,9 @@ const s_ = (n, one, many) => n === 1 ? one : many;
 const I18N = {
   en: {
     locale: "en-GB", code: "EN", switchTo: "Switch to English",
-    appName: "Lamp & Path", markHTML: "Lamp <em>&amp;</em> Path",
     tabs: { today: "Today", schedule: "Schedule", plan: "Settings" },
-    updateText: "A new version of Lamp & Path is ready.", reload: "Reload",
-    installText: "Install Lamp & Path to open it like an app, even offline.", install: "Install", notNow: "Not now",
+    updateText: "A new version of Le Sentier is ready.", reload: "Reload",
+    installText: "Install Le Sentier to open it like an app, even offline.", install: "Install", notNow: "Not now",
     installIOS: "To install on iPhone or iPad, tap <b>Share</b>, then <b>Add to Home Screen</b>.",
     sync: "Your progress is saved on this device and works offline. Use Settings › Backup to move it to another device.",
     counts: "Verse counts follow modern English Bibles such as the NIV and ESV: 23,145 Old Testament and 7,958 New Testament verses.",
@@ -166,8 +165,8 @@ const I18N = {
     confirmNew: n => `This starts a new schedule, and the ${n} ${s_(n, "day", "days")} you’ve marked as read will be cleared. To keep your place, use <b>Pick up where I left off</b> first.`,
     startNew: "Start new schedule", keepPlan: "Keep current plan",
     newSaved: "New schedule saved.", saved: "Saved.",
-    backupTitle: "Lamp & Path backup", backupReady: "Backup ready.", backupDownloaded: "Backup saved to your downloads.",
-    notBackup: "That file isn’t a Lamp &amp; Path backup. Choose the .json file you saved from this app.",
+    backupTitle: "Le Sentier backup", backupReady: "Backup ready.", backupDownloaded: "Backup saved to your downloads.",
+    notBackup: "That file isn’t a Le Sentier backup. Choose the .json file you saved from this app.",
     earlier: "an earlier date",
     restoreSummary: (w, d, n) => `Backup from ${w}: plan starting ${d}, ${n} ${s_(n, "day", "days")} with readings marked. This replaces the plan and ticks on this device.`,
     replace: "Replace with backup", cancel: "Cancel", restored: "Backup restored.",
@@ -176,7 +175,6 @@ const I18N = {
   },
   fr: {
     locale: "fr-FR", code: "FR", switchTo: "Passer en français",
-    appName: "Le Sentier", markHTML: "Le Sentier",
     tabs: { today: "Aujourd’hui", schedule: "Programme", plan: "Réglages" },
     updateText: "Une nouvelle version du Sentier est prête.", reload: "Recharger",
     installText: "Installez Le Sentier pour l’utiliser comme une application, même hors ligne.", install: "Installer", notNow: "Plus tard",
@@ -627,8 +625,6 @@ document.getElementById("theme-toggle").addEventListener("click", () => {
 let installIOS = false;
 function applyStatic() {
   document.documentElement.lang = lang;
-  document.title = L.appName;
-  document.querySelector(".mark").innerHTML = L.markHTML;
   for (const t of ["today", "schedule", "plan"]) document.getElementById("tab-" + t).textContent = L.tabs[t];
   document.getElementById("update-text").textContent = L.updateText;
   document.getElementById("update-now").textContent = L.reload;
@@ -741,7 +737,7 @@ function backupBlob() {
   return new Blob([JSON.stringify(body, null, 1)], { type: "application/json" });
 }
 async function saveBackup() {
-  const name = `lamp-and-path-backup-${todayISO()}.json`;
+  const name = `le-sentier-backup-${todayISO()}.json`;
   const blob = backupBlob();
   try {
     const file = new File([blob], name, { type: "application/json" });
