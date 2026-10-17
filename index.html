@@ -77,10 +77,18 @@ button { cursor: pointer; }
 .num { font-variant-numeric: tabular-nums lining-nums; }
 
 /* masthead */
-header.top { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+/* phone: name and controls on one row, tabs below; wider: one row */
+header.top { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "mark ctl" "tabs tabs"; align-items: center; gap: 14px 12px; }
+header.top .mark { grid-area: mark; }
+header.top .tabs { grid-area: tabs; }
+header.top .topctl { grid-area: ctl; }
+@media (min-width: 640px) {
+  header.top { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "mark tabs ctl"; }
+  header.top .tabs { justify-self: end; }
+}
 .mark { font-family: var(--display); font-weight: 700; font-size: 1.5rem; line-height: 1; letter-spacing: -0.015em; margin: 0; }
 .mark em { font-style: normal; color: var(--rubric); }
-.tabs { display: flex; gap: 6px; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
 .tabs button { border: 0; background: var(--chip); padding: 7px 15px; border-radius: 999px; font-weight: 600; font-size: 0.92rem; color: var(--muted); }
 .tabs button:hover { color: var(--ink); }
 .tabs button[aria-selected="true"] { background: var(--ink); color: var(--paper); }
@@ -88,6 +96,7 @@ header.top { display: flex; align-items: flex-end; justify-content: space-betwee
 .theme { width: 38px; height: 38px; border-radius: 50%; border: 0; background: var(--chip); color: var(--muted); display: grid; place-items: center; padding: 0; }
 .theme:hover { color: var(--ink); }
 .theme svg { width: 18px; height: 18px; }
+.theme.lang { width: auto; min-width: 38px; padding: 0 11px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; }
 
 /* day header */
 .dayhead { display: flex; flex-direction: column; gap: 4px; }
@@ -242,16 +251,17 @@ footer.foot p { margin: 0; }
 <div class="wrap">
   <header class="top">
     <h1 class="mark">Lamp <em>&amp;</em> Path</h1>
-    <div class="topctl">
     <nav class="tabs" role="tablist" aria-label="Sections">
       <button id="tab-today" role="tab" aria-selected="true" data-tab="today">Today</button>
       <button id="tab-schedule" role="tab" aria-selected="false" data-tab="schedule">Schedule</button>
       <button id="tab-plan" role="tab" aria-selected="false" data-tab="plan">Settings</button>
     </nav>
-    <button class="theme" type="button" id="theme-toggle"></button>
+    <div class="topctl">
+      <button class="theme lang" type="button" id="lang-toggle">FR</button>
+      <button class="theme" type="button" id="theme-toggle"></button>
     </div>
   </header>
-  <div class="banner" id="update-banner" hidden role="status"><p>A new version of Lamp &amp; Path is ready.</p><button class="btn primary" type="button" id="update-now">Reload</button></div>
+  <div class="banner" id="update-banner" hidden role="status"><p id="update-text">A new version of Lamp &amp; Path is ready.</p><button class="btn primary" type="button" id="update-now">Reload</button></div>
   <div class="banner browser-only" id="install-banner" hidden><p id="install-text">Install Lamp &amp; Path to open it like an app, even offline.</p><span class="actions"><button class="btn primary" type="button" id="install-now">Install</button><button class="btn quiet" type="button" id="install-later">Not now</button></span></div>
 
   <main id="main" style="display:contents">
@@ -262,7 +272,7 @@ footer.foot p { margin: 0; }
 
   <footer class="foot">
     <p class="sync cloud" id="sync">Your progress is saved on this device and works offline. Use Settings › Backup to move it to another device.</p>
-    <p>Verse counts follow modern English Bibles such as the NIV and ESV: 23,145 Old Testament and 7,958 New Testament verses.</p>
+    <p id="counts">Verse counts follow modern English Bibles such as the NIV and ESV: 23,145 Old Testament and 7,958 New Testament verses.</p>
   </footer>
 </div>
 

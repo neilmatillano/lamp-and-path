@@ -3,19 +3,23 @@ const COUNTS = [[31,25,24,26,32,22,24,22,29,32,32,20,18,24,21,16,27,33,38,18,34,
 const NAMES = ["Genesis","Exodus","Leviticus","Numbers","Deuteronomy","Joshua","Judges","Ruth","1 Samuel","2 Samuel","1 Kings","2 Kings","1 Chronicles","2 Chronicles","Ezra","Nehemiah","Esther","Job","Psalms","Proverbs","Ecclesiastes","Song of Solomon","Isaiah","Jeremiah","Lamentations","Ezekiel","Daniel","Hosea","Joel","Amos","Obadiah","Jonah","Micah","Nahum","Habakkuk","Zephaniah","Haggai","Zechariah","Malachi",
 "Matthew","Mark","Luke","John","Acts","Romans","1 Corinthians","2 Corinthians","Galatians","Ephesians","Philippians","Colossians","1 Thessalonians","2 Thessalonians","1 Timothy","2 Timothy","Titus","Philemon","Hebrews","James","1 Peter","2 Peter","1 John","2 John","3 John","Jude","Revelation"];
 
-function makeTestament(names, counts) {
+// French names follow the Louis Segond Bible; English names stay the key for Bible Gateway links
+const NAMES_FR = ["Genèse","Exode","Lévitique","Nombres","Deutéronome","Josué","Juges","Ruth","1 Samuel","2 Samuel","1 Rois","2 Rois","1 Chroniques","2 Chroniques","Esdras","Néhémie","Esther","Job","Psaumes","Proverbes","Ecclésiaste","Cantique des cantiques","Ésaïe","Jérémie","Lamentations","Ézéchiel","Daniel","Osée","Joël","Amos","Abdias","Jonas","Michée","Nahum","Habacuc","Sophonie","Aggée","Zacharie","Malachie",
+"Matthieu","Marc","Luc","Jean","Actes","Romains","1 Corinthiens","2 Corinthiens","Galates","Éphésiens","Philippiens","Colossiens","1 Thessaloniciens","2 Thessaloniciens","1 Timothée","2 Timothée","Tite","Philémon","Hébreux","Jacques","1 Pierre","2 Pierre","1 Jean","2 Jean","3 Jean","Jude","Apocalypse"];
+
+function makeTestament(names, counts, frNames) {
   let off = 0;
   const books = names.map((name, i) => {
     const ch = counts[i], cs = [];
     let o = off;
     for (const n of ch) { cs.push(o); o += n; }
-    const b = { name, ch, cs, start: off, len: o - off };
+    const b = { name, fr: frNames[i], ch, cs, start: off, len: o - off };
     off = o;
     return b;
   });
   return { books, total: off };
 }
-const T = { ot: makeTestament(NAMES.slice(0, 39), COUNTS.slice(0, 39)), nt: makeTestament(NAMES.slice(39), COUNTS.slice(39)) };
+const T = { ot: makeTestament(NAMES.slice(0, 39), COUNTS.slice(0, 39), NAMES_FR.slice(0, 39)), nt: makeTestament(NAMES.slice(39), COUNTS.slice(39), NAMES_FR.slice(39)) };
 
 function locate(t, i) {
   const books = T[t].books;
@@ -32,7 +36,8 @@ function indexOf(t, ref) {
   const v = Math.min(Math.max(1, ref.v), B.ch[c - 1]);
   return B.cs[c - 1] + v - 1;
 }
-function bookLabel(B, plural) { return (B.name === "Psalms" && !plural) ? "Psalm" : B.name; }
+function bookName(B) { return lang === "fr" ? B.fr : B.name; }
+function bookLabel(B, plural) { return (B.name === "Psalms" && !plural) ? (lang === "fr" ? "Psaume" : "Psalm") : bookName(B); }
 
 // split an actual index range [x, y] at book boundaries
 function byBook(t, x, y) {
@@ -48,11 +53,12 @@ function fmtPiece(t, x, y) {
   const r1 = locate(t, x), r2 = locate(t, y), B = T[t].books[r1.b];
   const whole = r1.v === 1 && r2.v === B.ch[r2.c - 1];
   if (whole) {
-    if (B.ch.length === 1 || (r1.c === 1 && r2.c === B.ch.length)) return B.name;
+    if (B.ch.length === 1 || (r1.c === 1 && r2.c === B.ch.length)) return bookName(B);
     return r1.c === r2.c ? `${bookLabel(B, false)} ${r1.c}` : `${bookLabel(B, true)} ${r1.c}–${r2.c}`;
   }
-  if (r1.c === r2.c) return r1.v === r2.v ? `${bookLabel(B, false)} ${r1.c}:${r1.v}` : `${bookLabel(B, false)} ${r1.c}:${r1.v}–${r2.v}`;
-  return `${bookLabel(B, true)} ${r1.c}:${r1.v}–${r2.c}:${r2.v}`;
+  const s = lang === "fr" ? "." : ":"; // French Bibles write chapter.verse
+  if (r1.c === r2.c) return r1.v === r2.v ? `${bookLabel(B, false)} ${r1.c}${s}${r1.v}` : `${bookLabel(B, false)} ${r1.c}${s}${r1.v}–${r2.v}`;
+  return `${bookLabel(B, true)} ${r1.c}${s}${r1.v}–${r2.c}${s}${r2.v}`;
 }
 function linkPiece(t, x, y) {
   const r1 = locate(t, x), r2 = locate(t, y), B = T[t].books[r1.b];
@@ -96,25 +102,161 @@ function chunk(P, t, d) {
 }
 //</core>
 
-const VERSIONS = [["NIV","New International Version"],["ESV","English Standard Version"],["KJV","King James Version"],["NKJV","New King James Version"],["NLT","New Living Translation"],["CSB","Christian Standard Bible"],["NASB1995","New American Standard 1995"],["LSG","Louis Segond (French)"],["MBBTAG","Magandang Balita Biblia (Tagalog)"],["ADB1905","Ang Dating Biblia (Tagalog)"]];
+// [Bible Gateway code, name, language of the translation when it isn't English]
+const VERSIONS = [["NIV","New International Version"],["ESV","English Standard Version"],["KJV","King James Version"],["NKJV","New King James Version"],["NLT","New Living Translation"],["CSB","Christian Standard Bible"],["NASB1995","New American Standard 1995"],["LSG","Louis Segond","fr"],["SG21","Segond 21","fr"],["BDS","Bible du Semeur","fr"],["MBBTAG","Magandang Balita Biblia","tl"],["ADB1905","Ang Dating Biblia","tl"]];
 const BIT = { ot: 1, nt: 2 };
 const LOCAL_KEY = "lamp-path-plan-v1";
 const TAB_KEY = "lamp-path-tab";
 const THEME_KEY = "lamp-path-theme";
+const LANG_KEY = "lamp-path-lang";
+
+/* ---------- language: English or French ---------- */
+const s_ = (n, one, many) => n === 1 ? one : many;
+const I18N = {
+  en: {
+    locale: "en-GB", code: "EN", switchTo: "Switch to English",
+    appName: "Lamp & Path", markHTML: "Lamp <em>&amp;</em> Path",
+    tabs: { today: "Today", schedule: "Schedule", plan: "Settings" },
+    updateText: "A new version of Lamp & Path is ready.", reload: "Reload",
+    installText: "Install Lamp & Path to open it like an app, even offline.", install: "Install", notNow: "Not now",
+    installIOS: "To install on iPhone or iPad, tap <b>Share</b>, then <b>Add to Home Screen</b>.",
+    sync: "Your progress is saved on this device and works offline. Use Settings › Backup to move it to another device.",
+    counts: "Verse counts follow modern English Bibles such as the NIV and ESV: 23,145 Old Testament and 7,958 New Testament verses.",
+    tname: { ot: "Old Testament", nt: "New Testament" },
+    langs: { fr: "French", tl: "Tagalog" },
+    finished: t => `${I18N.en.tname[t]} finished`,
+    noReading: t => `No ${I18N.en.tname[t]} reading`,
+    passLong: n => `${n === 2 ? "2nd" : n === 3 ? "3rd" : n + "th"} time through`,
+    passShort: n => n === 2 ? "2nd" : n === 3 ? "3rd" : n + "th",
+    verses: (n, f) => `${f} ${s_(n, "verse", "verses")}`,
+    readIn: v => `Read in ${v} ↗`,
+    read: "read", markRead: "mark as read", notRead: "not read",
+    rel: { today: "Today", yesterday: "Yesterday", tomorrow: "Tomorrow" },
+    startsOn: d => `Your plan starts on ${d}. You can read ahead.`,
+    allDone: "You finished the whole plan.",
+    endedOn: (d, n) => `The plan ended on ${d}. ${n} ${s_(n, "day", "days")} still open.`,
+    behind: n => `<b>${n} earlier ${s_(n, "day", "days")}</b> still to read.`,
+    todayDone: "Today’s reading is done.", onTrack: "You’re on track.",
+    catchUp: "Catch up", day: n => `Day ${n}`, dayOf: (a, b) => `Day ${a} of ${b}`,
+    seeAll: n => `See all ${n} in the schedule`,
+    prev: "‹ Previous", next: "Next ›", prevDay: "Previous day", nextDay: "Next day", today: "Today",
+    progress: "Progress", progressOf: name => `${name} progress`, versesOf: (a, b) => `${a} of ${b} verses`,
+    daysComplete: "days complete", daysToGo: "days to go", lastDay: y => `last day, ${y}`,
+    prevMonth: "Previous month", nextMonth: "Next month", thisMonth: "Jump to this month",
+    book: "Book", chapter: "Chapter", verse: "Verse",
+    whenStart: "When to start", firstDay: "First day",
+    whereStart: "Where to start", whereHint: "Each testament runs to its last book, then carries on from its first book, so the whole testament is covered.",
+    resume: "Pick up where I left off",
+    howMuch: "How much each day", modeDays: "Finish both testaments in a set number of days",
+    modeDaysHint: "The verses are split evenly, so every day has a similar amount from each testament.",
+    days: "Days", commonLengths: "Common lengths", chip: n => n === 365 ? "1 year" : n === 730 ? "2 years" : `${n} days`,
+    modePace: "Read a set number of verses each day",
+    repeat: "When one testament finishes first, start it again so every day keeps both readings.",
+    links: "Reading links", openIn: "Open passages in",
+    backup: "Backup", backupHint: "Your plan and ticks live on this device. Save a backup file to keep them safe or to carry on from another phone or computer.",
+    saveBackup: "Save a backup", restoreBackup: "Restore from backup",
+    savePlan: "Save plan", discard: "Discard changes",
+    preview: (a, b, d) => `About ${a} Old Testament and ${b} New Testament verses a day, for ${d} ${s_(d, "day", "days")}.`,
+    previewEnd: (d, x, y) => `Ends ${d}. Day 1: ${x} and ${y}.`,
+    resumeOn: "Sets each start to your first unread verse and the first day to today.",
+    resumeOff: "Available once you’ve marked something as read.",
+    startsUpdated: "Start points updated. Save to begin.",
+    confirmNew: n => `This starts a new schedule, and the ${n} ${s_(n, "day", "days")} you’ve marked as read will be cleared. To keep your place, use <b>Pick up where I left off</b> first.`,
+    startNew: "Start new schedule", keepPlan: "Keep current plan",
+    newSaved: "New schedule saved.", saved: "Saved.",
+    backupTitle: "Lamp & Path backup", backupReady: "Backup ready.", backupDownloaded: "Backup saved to your downloads.",
+    notBackup: "That file isn’t a Lamp &amp; Path backup. Choose the .json file you saved from this app.",
+    earlier: "an earlier date",
+    restoreSummary: (w, d, n) => `Backup from ${w}: plan starting ${d}, ${n} ${s_(n, "day", "days")} with readings marked. This replaces the plan and ticks on this device.`,
+    replace: "Replace with backup", cancel: "Cancel", restored: "Backup restored.",
+    themes: { system: "System", light: "Light", dark: "Dark" },
+    appearance: (a, b) => `Appearance: ${a}. Switch to ${b}`, appearanceShort: a => `Appearance: ${a}`,
+  },
+  fr: {
+    locale: "fr-FR", code: "FR", switchTo: "Passer en français",
+    appName: "Le Sentier", markHTML: "Le Sentier",
+    tabs: { today: "Aujourd’hui", schedule: "Programme", plan: "Réglages" },
+    updateText: "Une nouvelle version du Sentier est prête.", reload: "Recharger",
+    installText: "Installez Le Sentier pour l’ouvrir comme une app, même hors ligne.", install: "Installer", notNow: "Plus tard",
+    installIOS: "Pour l’installer sur iPhone ou iPad, touchez <b>Partager</b>, puis <b>Sur l’écran d’accueil</b>.",
+    sync: "Votre progression est enregistrée sur cet appareil et fonctionne hors ligne. Utilisez Réglages › Sauvegarde pour la transférer sur un autre appareil.",
+    counts: "Le nombre de versets suit les Bibles anglaises modernes comme la NIV et l’ESV : 23 145 versets dans l’Ancien Testament et 7 958 dans le Nouveau.",
+    tname: { ot: "Ancien Testament", nt: "Nouveau Testament" },
+    langs: { fr: "français", tl: "tagalog" },
+    finished: t => `${I18N.fr.tname[t]} terminé`,
+    noReading: t => t === "ot" ? "Aucune lecture de l’Ancien Testament" : "Aucune lecture du Nouveau Testament",
+    passLong: n => `${n}e passage`,
+    passShort: n => `${n}e`,
+    verses: (n, f) => `${f} ${s_(n, "verset", "versets")}`,
+    readIn: v => `Lire en ${v} ↗`,
+    read: "lu", markRead: "marquer comme lu", notRead: "non lu",
+    rel: { today: "Aujourd’hui", yesterday: "Hier", tomorrow: "Demain" },
+    startsOn: d => `Votre plan commence le ${d}. Vous pouvez lire en avance.`,
+    allDone: "Vous avez terminé tout le plan.",
+    endedOn: (d, n) => `Le plan s’est terminé le ${d}. ${n} ${s_(n, "jour reste", "jours restent")} à lire.`,
+    behind: n => `<b>${n} ${s_(n, "jour précédent", "jours précédents")}</b> encore à lire.`,
+    todayDone: "La lecture du jour est faite.", onTrack: "Vous êtes à jour.",
+    catchUp: "Rattrapage", day: n => `Jour ${n}`, dayOf: (a, b) => `Jour ${a} sur ${b}`,
+    seeAll: n => `Voir les ${n} dans le programme`,
+    prev: "‹ Précédent", next: "Suivant ›", prevDay: "Jour précédent", nextDay: "Jour suivant", today: "Aujourd’hui",
+    progress: "Progression", progressOf: name => `Progression : ${name}`, versesOf: (a, b) => `${a} sur ${b} versets`,
+    daysComplete: "jours terminés", daysToGo: "jours restants", lastDay: y => `dernier jour, ${y}`,
+    prevMonth: "Mois précédent", nextMonth: "Mois suivant", thisMonth: "Aller au mois en cours",
+    book: "Livre", chapter: "Chapitre", verse: "Verset",
+    whenStart: "Quand commencer", firstDay: "Premier jour",
+    whereStart: "Où commencer", whereHint: "Chaque testament se lit jusqu’à son dernier livre, puis reprend à son premier livre, pour être lu en entier.",
+    resume: "Reprendre où j’en étais",
+    howMuch: "Combien chaque jour", modeDays: "Lire les deux testaments en un nombre de jours fixé",
+    modeDaysHint: "Les versets sont répartis également : chaque jour compte une quantité semblable de chaque testament.",
+    days: "Jours", commonLengths: "Durées courantes", chip: n => n === 365 ? "1 an" : n === 730 ? "2 ans" : `${n} jours`,
+    modePace: "Lire un nombre fixe de versets par jour",
+    repeat: "Quand un testament se termine en premier, le recommencer pour garder les deux lectures chaque jour.",
+    links: "Liens de lecture", openIn: "Ouvrir les passages dans",
+    backup: "Sauvegarde", backupHint: "Votre plan et vos coches sont enregistrés sur cet appareil. Enregistrez un fichier de sauvegarde pour les protéger ou pour continuer sur un autre téléphone ou ordinateur.",
+    saveBackup: "Enregistrer une sauvegarde", restoreBackup: "Restaurer une sauvegarde",
+    savePlan: "Enregistrer le plan", discard: "Annuler les modifications",
+    preview: (a, b, d) => `Environ ${a} versets de l’Ancien Testament et ${b} du Nouveau Testament par jour, pendant ${d} ${s_(d, "jour", "jours")}.`,
+    previewEnd: (d, x, y) => `Fin le ${d}. Jour 1 : ${x} et ${y}.`,
+    resumeOn: "Place chaque départ sur votre premier verset non lu, et le premier jour à aujourd’hui.",
+    resumeOff: "Disponible dès qu’une lecture est cochée.",
+    startsUpdated: "Points de départ mis à jour. Enregistrez pour commencer.",
+    confirmNew: n => `Cela démarre un nouveau programme, et ${s_(n, "le jour coché comme lu sera effacé", `les ${n} jours cochés comme lus seront effacés`)}. Pour garder votre place, utilisez d’abord <b>Reprendre où j’en étais</b>.`,
+    startNew: "Démarrer un nouveau programme", keepPlan: "Garder le plan actuel",
+    newSaved: "Nouveau programme enregistré.", saved: "Enregistré.",
+    backupTitle: "Sauvegarde Le Sentier", backupReady: "Sauvegarde prête.", backupDownloaded: "Sauvegarde enregistrée dans vos téléchargements.",
+    notBackup: "Ce fichier n’est pas une sauvegarde du Sentier. Choisissez le fichier .json enregistré depuis cette app.",
+    earlier: "une date antérieure",
+    restoreSummary: (w, d, n) => `Sauvegarde du ${w} : plan commençant le ${d}, ${n} ${s_(n, "jour coché", "jours cochés")}. Elle remplacera le plan et les coches de cet appareil.`,
+    replace: "Remplacer par la sauvegarde", cancel: "Annuler", restored: "Sauvegarde restaurée.",
+    themes: { system: "Système", light: "Clair", dark: "Sombre" },
+    appearance: (a, b) => `Apparence : ${a}. Passer à ${b}`, appearanceShort: a => `Apparence : ${a}`,
+  },
+};
+let lang = "en";
+try { const l = localStorage.getItem(LANG_KEY); lang = l === "fr" || l === "en" ? l : (/^fr\b/i.test(navigator.language || "") ? "fr" : "en"); } catch (e) {}
+let L = I18N[lang];
+const TNAME = { get ot() { return L.tname.ot; }, get nt() { return L.tname.nt; } };
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+function versionName([k, n, tag]) { return tag ? `${n} (${L.langs[tag]})` : n; }
 
 /* ---------- dates (calendar days, no time zone drift) ---------- */
 function todayISO() { const d = new Date(); return iso(d.getFullYear(), d.getMonth() + 1, d.getDate()); }
 function iso(y, m, d) { return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`; }
 function dayNum(s) { const [y, m, d] = s.split("-").map(Number); return Math.round(Date.UTC(y, m - 1, d) / 864e5); }
 function numToDate(n) { return new Date(n * 864e5); }
-const fmt = {
-  long: new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }),
-  longY: new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }),
-  dow: new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" }),
-  dm: new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }),
-  month: new Intl.DateTimeFormat("en-GB", { month: "long", year: "numeric", timeZone: "UTC" }),
-};
-const n0 = new Intl.NumberFormat("en-GB");
+let fmt, n0;
+function makeFormats() {
+  const loc = L.locale;
+  fmt = {
+    long: new Intl.DateTimeFormat(loc, { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }),
+    longY: new Intl.DateTimeFormat(loc, { weekday: "short", day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }),
+    dow: new Intl.DateTimeFormat(loc, { weekday: "short", timeZone: "UTC" }),
+    dm: new Intl.DateTimeFormat(loc, { day: "numeric", month: "short", timeZone: "UTC" }),
+    month: new Intl.DateTimeFormat(loc, { month: "long", year: "numeric", timeZone: "UTC" }),
+  };
+  n0 = new Intl.NumberFormat(loc);
+}
+makeFormats();
 
 /* ---------- state ---------- */
 function defaultState() {
@@ -179,9 +321,7 @@ function dateOf(d) { return numToDate(dayNum(state.settings.start) + d); }
 /* ---------- small render helpers ---------- */
 const CHECK = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.4 4.8 9 10 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const TNAME = { ot: "Old Testament", nt: "New Testament" };
 function gatewayURL(q) { return "https://www.biblegateway.com/passage/?search=" + encodeURIComponent(q) + "&version=" + encodeURIComponent(state.settings.version); }
-function ordinal(n) { return n === 2 ? "2nd" : n === 3 ? "3rd" : n + "th"; }
 
 /* ---------- Today ---------- */
 function stats() {
@@ -203,17 +343,17 @@ function stats() {
 function readingCard(t, d) {
   const c = chunk(P, t, d);
   if (!c || !c.text) {
-    const msg = c && c.finished ? `${TNAME[t]} finished` : `No ${TNAME[t]} reading`;
+    const msg = c && c.finished ? L.finished(t) : L.noReading(t);
     return `<article class="reading ${t} empty"><div class="label"><p class="eyebrow">${TNAME[t]}</p></div><p class="ref">${msg}</p></article>`;
   }
   const on = (getMask(d) & BIT[t]) !== 0;
-  const passTag = c.pass > 1 ? `<span class="pass">${ordinal(c.pass)} time through</span>` : "";
+  const passTag = c.pass > 1 ? `<span class="pass">${L.passLong(c.pass)}</span>` : "";
   return `<article class="reading ${t}">
     <div class="label"><p class="eyebrow">${TNAME[t]}</p>${passTag}</div>
     <p class="ref">${esc(c.text)}</p>
-    <div class="meta"><span class="num">${n0.format(c.n)} verse${c.n === 1 ? "" : "s"}</span>
-      <a href="${gatewayURL(c.query)}" target="_blank" rel="noopener">Read in ${esc(state.settings.version)} ↗</a></div>
-    <button class="tick" type="button" aria-pressed="${on}" data-toggle="${t}" data-day="${d}" aria-label="${TNAME[t]}: ${esc(c.text)}, ${on ? "read" : "mark as read"}">${CHECK}</button>
+    <div class="meta"><span class="num">${L.verses(c.n, n0.format(c.n))}</span>
+      <a href="${gatewayURL(c.query)}" target="_blank" rel="noopener">${L.readIn(esc(state.settings.version))}</a></div>
+    <button class="tick" type="button" aria-pressed="${on}" data-toggle="${t}" data-day="${d}" aria-label="${TNAME[t]}: ${esc(c.text)}, ${on ? L.read : L.markRead}">${CHECK}</button>
   </article>`;
 }
 function renderToday() {
@@ -225,51 +365,51 @@ function renderToday() {
   const s = stats();
   const date = dateOf(d);
   let rel = "";
-  if (d === ti) rel = "Today";
-  else if (d === ti - 1) rel = "Yesterday";
-  else if (d === ti + 1) rel = "Tomorrow";
+  if (d === ti) rel = L.rel.today;
+  else if (d === ti - 1) rel = L.rel.yesterday;
+  else if (d === ti + 1) rel = L.rel.tomorrow;
   let note = "";
-  if (ti < 0) note = `Your plan starts on ${fmt.longY.format(dateOf(0))}. You can read ahead.`;
-  else if (ti >= P.days) note = s.daysDone === P.days ? "You finished the whole plan." : `The plan ended on ${fmt.longY.format(dateOf(P.days - 1))}. ${s.behind.length} day${s.behind.length === 1 ? "" : "s"} still open.`;
-  else if (s.behind.length) note = `<b>${s.behind.length} earlier day${s.behind.length === 1 ? "" : "s"}</b> still to read.`;
-  else if (d === ti && dayComplete(d)) note = "Today’s reading is done.";
-  else note = "You’re on track.";
+  if (ti < 0) note = L.startsOn(fmt.longY.format(dateOf(0)));
+  else if (ti >= P.days) note = s.daysDone === P.days ? L.allDone : L.endedOn(fmt.longY.format(dateOf(P.days - 1)), s.behind.length);
+  else if (s.behind.length) note = L.behind(s.behind.length);
+  else if (d === ti && dayComplete(d)) note = L.todayDone;
+  else note = L.onTrack;
 
   const catchup = s.behind.length ? `<section class="catchup" aria-labelledby="cu-h">
-      <h3 class="section-title" id="cu-h">Catch up</h3>
+      <h3 class="section-title" id="cu-h">${L.catchUp}</h3>
       <ul>${s.behind.slice(0, 5).map(b => {
         const lines = ["ot", "nt"].map(t => { const c = chunk(P, t, b); return c && c.text ? `<span>${esc(c.text)}</span>` : ""; }).filter(Boolean).join("<br>");
         const btns = ["ot", "nt"].map(t => { const c = chunk(P, t, b); if (!c || !c.text) return ""; const on = (getMask(b) & BIT[t]) !== 0;
-          return `<button class="chk ${t}" type="button" aria-pressed="${on}" data-toggle="${t}" data-day="${b}" aria-label="${TNAME[t]}, day ${b + 1}: ${on ? "read" : "not read"}">${CHECK}</button>`; }).join("");
-        return `<li><div class="refs"><div class="when num">Day ${b + 1} · ${fmt.longY.format(dateOf(b))}</div>${lines}</div><div class="mini">${btns}</div></li>`;
+          return `<button class="chk ${t}" type="button" aria-pressed="${on}" data-toggle="${t}" data-day="${b}" aria-label="${TNAME[t]}, ${L.day(b + 1)}: ${on ? L.read : L.notRead}">${CHECK}</button>`; }).join("");
+        return `<li><div class="refs"><div class="when num">${L.day(b + 1)} · ${fmt.longY.format(dateOf(b))}</div>${lines}</div><div class="mini">${btns}</div></li>`;
       }).join("")}</ul>
-      ${s.behind.length > 5 ? `<button class="btn quiet" type="button" data-goto="schedule-first-open">See all ${s.behind.length} in the schedule</button>` : ""}
+      ${s.behind.length > 5 ? `<button class="btn quiet" type="button" data-goto="schedule-first-open">${L.seeAll(s.behind.length)}</button>` : ""}
     </section>` : "";
 
   const pct = (x) => x.total ? Math.round(x.read / x.total * 1000) / 10 : 0;
   el.innerHTML = `
     <section class="dayhead">
-      <p class="eyebrow num">Day ${n0.format(d + 1)} of ${n0.format(P.days)}${rel ? " · " + rel : ""}</p>
-      <h2>${fmt.long.format(date)}</h2>
+      <p class="eyebrow num">${L.dayOf(n0.format(d + 1), n0.format(P.days))}${rel ? " · " + rel : ""}</p>
+      <h2>${cap(fmt.long.format(date))}</h2>
       <p class="status">${note}</p>
     </section>
     <div class="daynav">
-      <button class="btn" type="button" data-step="-1" ${d <= 0 ? "disabled" : ""} aria-label="Previous day">‹ Previous</button>
-      <button class="btn" type="button" data-step="0" ${d === ti || ti < 0 || ti >= P.days ? "disabled" : ""}>Today</button>
-      <button class="btn" type="button" data-step="1" ${d >= P.days - 1 ? "disabled" : ""} aria-label="Next day">Next ›</button>
+      <button class="btn" type="button" data-step="-1" ${d <= 0 ? "disabled" : ""} aria-label="${L.prevDay}">${L.prev}</button>
+      <button class="btn" type="button" data-step="0" ${d === ti || ti < 0 || ti >= P.days ? "disabled" : ""}>${L.today}</button>
+      <button class="btn" type="button" data-step="1" ${d >= P.days - 1 ? "disabled" : ""} aria-label="${L.nextDay}">${L.next}</button>
     </div>
     <section class="readings">${readingCard("ot", d)}${readingCard("nt", d)}</section>
     <section class="progress" aria-labelledby="pr-h">
-      <h3 class="section-title" id="pr-h">Progress</h3>
+      <h3 class="section-title" id="pr-h">${L.progress}</h3>
       <div class="ribbons">${["ot", "nt"].map(t => `<div class="ribbon ${t}">
         <span class="name">${TNAME[t]}</span>
-        <div class="bar" role="progressbar" aria-label="${TNAME[t]} progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct(s[t])}"><div class="fill" style="width:${pct(s[t])}%"></div></div>
-        <span class="count num">${n0.format(s[t].read)} of ${n0.format(s[t].total)} verses</span>
+        <div class="bar" role="progressbar" aria-label="${L.progressOf(TNAME[t])}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct(s[t])}"><div class="fill" style="width:${pct(s[t])}%"></div></div>
+        <span class="count num">${L.versesOf(n0.format(s[t].read), n0.format(s[t].total))}</span>
       </div>`).join("")}</div>
       <div class="facts num">
-        <div><strong>${n0.format(s.daysDone)}</strong>days complete</div>
-        <div><strong>${n0.format(Math.max(0, P.days - s.daysDone))}</strong>days to go</div>
-        <div><strong>${fmt.dm.format(dateOf(P.days - 1))}</strong>last day, ${dateOf(P.days - 1).getUTCFullYear()}</div>
+        <div><strong>${n0.format(s.daysDone)}</strong>${L.daysComplete}</div>
+        <div><strong>${n0.format(Math.max(0, P.days - s.daysDone))}</strong>${L.daysToGo}</div>
+        <div><strong>${fmt.dm.format(dateOf(P.days - 1))}</strong>${L.lastDay(dateOf(P.days - 1).getUTCFullYear())}</div>
       </div>
     </section>
     ${catchup}`;
@@ -292,31 +432,31 @@ function renderSchedule() {
     const dt = dateOf(d);
     const lines = ["ot", "nt"].map(t => {
       const c = chunk(P, t, d);
-      if (!c || !c.text) return `<div class="line ${t}"><span></span><span class="t" style="color:var(--muted)">${c && c.finished ? TNAME[t] + " finished" : "—"}</span></div>`;
+      if (!c || !c.text) return `<div class="line ${t}"><span></span><span class="t" style="color:var(--muted)">${c && c.finished ? L.finished(t) : "—"}</span></div>`;
       const on = (getMask(d) & BIT[t]) !== 0;
-      return `<div class="line ${t}${on ? " done" : ""}"><button class="chk" type="button" aria-pressed="${on}" data-toggle="${t}" data-day="${d}" aria-label="${TNAME[t]}: ${esc(c.text)}, ${on ? "read" : "not read"}">${CHECK}</button><span class="t">${esc(c.text)}${c.pass > 1 ? ` <span class="pass" style="--tc:var(--${t});--ts:var(--${t}-soft)">${ordinal(c.pass)}</span>` : ""}</span></div>`;
+      return `<div class="line ${t}${on ? " done" : ""}"><button class="chk" type="button" aria-pressed="${on}" data-toggle="${t}" data-day="${d}" aria-label="${TNAME[t]}: ${esc(c.text)}, ${on ? L.read : L.notRead}">${CHECK}</button><span class="t">${esc(c.text)}${c.pass > 1 ? ` <span class="pass" style="--tc:var(--${t});--ts:var(--${t}-soft)">${L.passShort(c.pass)}</span>` : ""}</span></div>`;
     }).join("");
-    rows.push(`<li class="${d === ti ? "today" : ""}" id="row-${d}"><button class="open" type="button" data-open="${d}"><span class="date num"><b>${fmt.dm.format(dt)}</b>${fmt.dow.format(dt)} · Day ${d + 1}</span></button><div class="lines">${lines}</div></li>`);
+    rows.push(`<li class="${d === ti ? "today" : ""}" id="row-${d}"><button class="open" type="button" data-open="${d}"><span class="date num"><b>${fmt.dm.format(dt)}</b>${fmt.dow.format(dt)} · ${L.day(d + 1)}</span></button><div class="lines">${lines}</div></li>`);
   }
   el.innerHTML = `
     <div class="monthbar">
-      <button class="btn" type="button" data-month="-1" ${ui.monthKey <= first ? "disabled" : ""} aria-label="Previous month">‹</button>
-      <h2>${fmt.month.format(new Date(Date.UTC(y, m, 1)))}</h2>
-      <button class="btn" type="button" data-month="1" ${ui.monthKey >= last ? "disabled" : ""} aria-label="Next month">›</button>
+      <button class="btn" type="button" data-month="-1" ${ui.monthKey <= first ? "disabled" : ""} aria-label="${L.prevMonth}">‹</button>
+      <h2>${cap(fmt.month.format(new Date(Date.UTC(y, m, 1))))}</h2>
+      <button class="btn" type="button" data-month="1" ${ui.monthKey >= last ? "disabled" : ""} aria-label="${L.nextMonth}">›</button>
     </div>
     <ul class="sched">${rows.join("")}</ul>
-    <div class="actions"><button class="btn quiet" type="button" data-month="today">Jump to this month</button></div>`;
+    <div class="actions"><button class="btn quiet" type="button" data-month="today">${L.thisMonth}</button></div>`;
 }
 
 /* ---------- Plan form ---------- */
-function bookOptions(t, sel) { return T[t].books.map((B, i) => `<option value="${i}" ${i === sel ? "selected" : ""}>${esc(B.name)}</option>`).join(""); }
+function bookOptions(t, sel) { return T[t].books.map((B, i) => `<option value="${i}" ${i === sel ? "selected" : ""}>${esc(bookName(B))}</option>`).join(""); }
 function rangeOptions(n, sel) { let s = ""; for (let i = 1; i <= n; i++) s += `<option value="${i}" ${i === sel ? "selected" : ""}>${i}</option>`; return s; }
 function startFields(t, r) {
   const B = T[t].books[r.b];
   return `<div class="fields">
-    <div class="field ${t}"><label for="${t}-book">Book</label><select class="book" id="${t}-book" data-ref="${t}" data-part="b">${bookOptions(t, r.b)}</select></div>
-    <div class="field ${t}"><label for="${t}-ch">Chapter</label><select class="small" id="${t}-ch" data-ref="${t}" data-part="c">${rangeOptions(B.ch.length, r.c)}</select></div>
-    <div class="field ${t}"><label for="${t}-v">Verse</label><select class="small" id="${t}-v" data-ref="${t}" data-part="v">${rangeOptions(B.ch[r.c - 1], r.v)}</select></div>
+    <div class="field ${t}"><label for="${t}-book">${L.book}</label><select class="book" id="${t}-book" data-ref="${t}" data-part="b">${bookOptions(t, r.b)}</select></div>
+    <div class="field ${t}"><label for="${t}-ch">${L.chapter}</label><select class="small" id="${t}-ch" data-ref="${t}" data-part="c">${rangeOptions(B.ch.length, r.c)}</select></div>
+    <div class="field ${t}"><label for="${t}-v">${L.verse}</label><select class="small" id="${t}-v" data-ref="${t}" data-part="v">${rangeOptions(B.ch[r.c - 1], r.v)}</select></div>
   </div>`;
 }
 let draft = null;
@@ -328,53 +468,53 @@ function renderPlan(force) {
   el.innerHTML = `
   <form class="plan" id="plan-form" novalidate>
     <fieldset>
-      <legend>When to start</legend>
-      <div class="fields"><div class="field"><label for="start-date">First day</label><input type="date" id="start-date" value="${S.start}"></div>
-      <button class="btn" type="button" id="start-today">Today</button></div>
+      <legend>${L.whenStart}</legend>
+      <div class="fields"><div class="field"><label for="start-date">${L.firstDay}</label><input type="date" id="start-date" value="${S.start}"></div>
+      <button class="btn" type="button" id="start-today">${L.today}</button></div>
     </fieldset>
     <fieldset>
-      <legend>Where to start</legend>
-      <p class="hint">Each testament runs to its last book, then carries on from its first book, so the whole testament is covered.</p>
-      <p class="eyebrow" style="color:var(--ot)">Old Testament</p>
+      <legend>${L.whereStart}</legend>
+      <p class="hint">${L.whereHint}</p>
+      <p class="eyebrow" style="color:var(--ot)">${TNAME.ot}</p>
       ${startFields("ot", S.ot)}
-      <p class="eyebrow" style="color:var(--nt)">New Testament</p>
+      <p class="eyebrow" style="color:var(--nt)">${TNAME.nt}</p>
       ${startFields("nt", S.nt)}
-      <div class="actions"><button class="btn" type="button" id="resume">Pick up where I left off</button><span class="hint" id="resume-hint"></span></div>
+      <div class="actions"><button class="btn" type="button" id="resume">${L.resume}</button><span class="hint" id="resume-hint"></span></div>
     </fieldset>
     <fieldset>
-      <legend>How much each day</legend>
+      <legend>${L.howMuch}</legend>
       <div class="choice"><input type="radio" name="mode" value="days" id="mode-days" ${S.mode === "days" ? "checked" : ""}>
-        <div class="body"><label class="title" for="mode-days">Finish both testaments in a set number of days</label>
-          <p class="hint">The verses are split evenly, so every day has a similar amount from each testament.</p>
-          <div class="fields"><div class="field"><label for="days">Days</label><input type="number" id="days" min="1" max="3650" value="${S.days}"></div>
-          <div class="chips" role="group" aria-label="Common lengths">${[90, 180, 365, 730].map(n => `<button type="button" data-days="${n}" aria-pressed="${S.mode === "days" && S.days === n}">${n === 365 ? "1 year" : n === 730 ? "2 years" : n + " days"}</button>`).join("")}</div></div>
+        <div class="body"><label class="title" for="mode-days">${L.modeDays}</label>
+          <p class="hint">${L.modeDaysHint}</p>
+          <div class="fields"><div class="field"><label for="days">${L.days}</label><input type="number" id="days" min="1" max="3650" value="${S.days}"></div>
+          <div class="chips" role="group" aria-label="${L.commonLengths}">${[90, 180, 365, 730].map(n => `<button type="button" data-days="${n}" aria-pressed="${S.mode === "days" && S.days === n}">${L.chip(n)}</button>`).join("")}</div></div>
         </div></div>
       <div class="choice"><input type="radio" name="mode" value="pace" id="mode-pace" ${S.mode === "pace" ? "checked" : ""}>
-        <div class="body"><label class="title" for="mode-pace">Read a set number of verses each day</label>
+        <div class="body"><label class="title" for="mode-pace">${L.modePace}</label>
           <div class="fields">
-            <div class="field ot"><label for="ot-per">Old Testament</label><input type="number" id="ot-per" min="1" max="${T.ot.total}" value="${S.otPer}"></div>
-            <div class="field nt"><label for="nt-per">New Testament</label><input type="number" id="nt-per" min="1" max="${T.nt.total}" value="${S.ntPer}"></div>
+            <div class="field ot"><label for="ot-per">${TNAME.ot}</label><input type="number" id="ot-per" min="1" max="${T.ot.total}" value="${S.otPer}"></div>
+            <div class="field nt"><label for="nt-per">${TNAME.nt}</label><input type="number" id="nt-per" min="1" max="${T.nt.total}" value="${S.ntPer}"></div>
           </div>
-          <label class="toggle" for="repeat"><input type="checkbox" id="repeat" ${S.repeat ? "checked" : ""}><span>When one testament finishes first, start it again so every day keeps both readings.</span></label>
+          <label class="toggle" for="repeat"><input type="checkbox" id="repeat" ${S.repeat ? "checked" : ""}><span>${L.repeat}</span></label>
         </div></div>
     </fieldset>
     <fieldset>
-      <legend>Reading links</legend>
-      <div class="field"><label for="version">Open passages in</label><select id="version">${VERSIONS.map(([k, n]) => `<option value="${k}" ${k === S.version ? "selected" : ""}>${esc(n)}</option>`).join("")}</select></div>
+      <legend>${L.links}</legend>
+      <div class="field"><label for="version">${L.openIn}</label><select id="version">${VERSIONS.map(v => `<option value="${v[0]}" ${v[0] === S.version ? "selected" : ""}>${esc(versionName(v))}</option>`).join("")}</select></div>
     </fieldset>
     <fieldset>
-      <legend>Backup</legend>
-      <p class="hint">Your plan and ticks live on this device. Save a backup file to keep them safe or to carry on from another phone or computer.</p>
+      <legend>${L.backup}</legend>
+      <p class="hint">${L.backupHint}</p>
       <div class="actions">
-        <button class="btn" type="button" id="backup-save">Save a backup</button>
-        <label class="btn" for="backup-file">Restore from backup</label>
+        <button class="btn" type="button" id="backup-save">${L.saveBackup}</button>
+        <label class="btn" for="backup-file">${L.restoreBackup}</label>
         <input type="file" id="backup-file" accept="application/json,.json" hidden>
       </div>
       <div id="backup-slot"></div>
     </fieldset>
     <div class="preview" id="preview" aria-live="polite"></div>
     <div id="confirm-slot"></div>
-    <div class="actions"><button class="btn primary" type="submit" id="save">Save plan</button><button class="btn quiet" type="button" id="discard">Discard changes</button><span class="toast" id="toast" role="status"></span></div>
+    <div class="actions"><button class="btn primary" type="submit" id="save">${L.savePlan}</button><button class="btn quiet" type="button" id="discard">${L.discard}</button><span class="toast" id="toast" role="status"></span></div>
   </form>`;
   updatePreview();
   updateResumeHint();
@@ -389,8 +529,8 @@ function updatePreview() {
   const endDate = numToDate(dayNum(S.start) + Q.days - 1);
   const c0 = { ot: chunk(Q, "ot", 0), nt: chunk(Q, "nt", 0) };
   document.getElementById("preview").innerHTML = `
-    <span class="big num">About ${n0.format(r("ot"))} Old Testament and ${n0.format(r("nt"))} New Testament verses a day, for ${n0.format(Q.days)} day${Q.days === 1 ? "" : "s"}.</span>
-    <span class="small num">Ends ${fmt.longY.format(endDate)}. Day 1: ${esc(c0.ot && c0.ot.text || "—")} and ${esc(c0.nt && c0.nt.text || "—")}.</span>`;
+    <span class="big num">${L.preview(n0.format(r("ot")), n0.format(r("nt")), Q.days === 1 ? 1 : n0.format(Q.days))}</span>
+    <span class="small num">${L.previewEnd(fmt.longY.format(endDate), esc(c0.ot && c0.ot.text || "—"), esc(c0.nt && c0.nt.text || "—"))}</span>`;
   document.querySelectorAll("[data-days]").forEach(b => b.setAttribute("aria-pressed", String(S.mode === "days" && S.days === Number(b.dataset.days))));
   document.getElementById("discard").hidden = !ui.dirty;
 }
@@ -408,7 +548,7 @@ function nextUnread(t) {
 function updateResumeHint() {
   const any = state.done.replace(/0/g, "").length > 0;
   document.getElementById("resume").disabled = !any;
-  document.getElementById("resume-hint").textContent = any ? "Sets each start to your first unread verse and the first day to today." : "Available once you’ve marked something as read.";
+  document.getElementById("resume-hint").textContent = any ? L.resumeOn : L.resumeOff;
 }
 
 /* ---------- wiring ---------- */
@@ -429,9 +569,9 @@ function renderAll(opts) {
 
 /* ---------- appearance: follow the device, or force light or dark ---------- */
 const THEMES = {
-  system: { next: "light", label: "System", icon: '<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/>' },
-  light: { next: "dark", label: "Light", icon: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>' },
-  dark: { next: "system", label: "Dark", icon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>' }
+  system: { next: "light", icon: '<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/>' },
+  light: { next: "dark", icon: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>' },
+  dark: { next: "system", icon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>' }
 };
 const THEME_COLOR = { light: "#EDEFEA", dark: "#111513" };
 function applyTheme(theme) {
@@ -443,8 +583,8 @@ function applyTheme(theme) {
   }
   const T = THEMES[theme], btn = document.getElementById("theme-toggle");
   btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">${T.icon}</svg>`;
-  btn.setAttribute("aria-label", `Appearance: ${T.label}. Switch to ${THEMES[T.next].label}`);
-  btn.title = `Appearance: ${T.label}`;
+  btn.setAttribute("aria-label", L.appearance(L.themes[theme], L.themes[T.next]));
+  btn.title = L.appearanceShort(L.themes[theme]);
 }
 let theme = "system";
 try { const t = localStorage.getItem(THEME_KEY); if (t === "light" || t === "dark") theme = t; } catch (e) {}
@@ -454,6 +594,38 @@ document.getElementById("theme-toggle").addEventListener("click", () => {
   try { if (theme === "system") localStorage.removeItem(THEME_KEY); else localStorage.setItem(THEME_KEY, theme); } catch (e) {}
   applyTheme(theme);
 });
+
+/* ---------- language switch: English ⇄ French ---------- */
+let installIOS = false;
+function applyStatic() {
+  document.documentElement.lang = lang;
+  document.title = L.appName;
+  document.querySelector(".mark").innerHTML = L.markHTML;
+  for (const t of ["today", "schedule", "plan"]) document.getElementById("tab-" + t).textContent = L.tabs[t];
+  document.getElementById("update-text").textContent = L.updateText;
+  document.getElementById("update-now").textContent = L.reload;
+  document.getElementById("install-text").innerHTML = installIOS ? L.installIOS : esc(L.installText);
+  document.getElementById("install-now").textContent = L.install;
+  document.getElementById("install-later").textContent = L.notNow;
+  document.getElementById("sync").textContent = L.sync;
+  document.getElementById("counts").textContent = L.counts;
+  // the button names the language it switches to, in that language
+  const other = lang === "fr" ? "en" : "fr", btn = document.getElementById("lang-toggle");
+  btn.textContent = I18N[other].code;
+  btn.lang = other;
+  btn.setAttribute("aria-label", I18N[other].switchTo);
+  btn.title = I18N[other].switchTo;
+}
+function setLang(next) {
+  lang = next; L = I18N[lang];
+  try { localStorage.setItem(LANG_KEY, lang); } catch (e) {}
+  makeFormats();
+  applyStatic();
+  applyTheme(theme);
+  if (ui.tab === "plan") renderPlan(true); else renderAll(); // renderPlan keeps unsaved changes
+}
+applyStatic();
+document.getElementById("lang-toggle").addEventListener("click", () => setLang(lang === "fr" ? "en" : "fr"));
 
 document.querySelector(".tabs").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (b) showTab(b.dataset.tab); });
 
@@ -507,7 +679,7 @@ planView.addEventListener("click", e => {
     draft.start = todayISO();
     const keep = JSON.parse(JSON.stringify(draft));
     ui.dirty = true; renderPlan(true); draft = keep; markDirty();
-    document.getElementById("toast").textContent = "Start points updated. Save to begin.";
+    document.getElementById("toast").textContent = L.startsUpdated;
     return;
   }
   if (e.target.id === "discard") { ui.dirty = false; draft = null; renderPlan(true); return; }
@@ -519,8 +691,8 @@ planView.addEventListener("submit", e => {
   const ticks = state.done.replace(/0/g, "").length;
   if (shapeChanged(draft, state.settings) && ticks > 0) {
     document.getElementById("confirm-slot").innerHTML = `<div class="confirm" role="alert">
-      <p>This starts a new schedule, and the ${ticks} day${ticks === 1 ? "" : "s"} you’ve marked as read will be cleared. To keep your place, use <b>Pick up where I left off</b> first.</p>
-      <div class="actions"><button class="btn primary" type="button" id="confirm-new">Start new schedule</button><button class="btn" type="button" id="confirm-cancel">Keep current plan</button></div></div>`;
+      <p>${L.confirmNew(ticks)}</p>
+      <div class="actions"><button class="btn primary" type="button" id="confirm-new">${L.startNew}</button><button class="btn" type="button" id="confirm-cancel">${L.keepPlan}</button></div></div>`;
     return;
   }
   applyPlan(shapeChanged(draft, state.settings));
@@ -531,7 +703,7 @@ function applyPlan(reset) {
   commit();
   ui.dirty = false; ui.day = null; ui.monthKey = null; draft = null;
   renderPlan(true);
-  document.getElementById("toast").textContent = reset ? "New schedule saved." : "Saved.";
+  document.getElementById("toast").textContent = reset ? L.newSaved : L.saved;
 }
 
 /* ---------- backup ---------- */
@@ -546,8 +718,8 @@ async function saveBackup() {
   try {
     const file = new File([blob], name, { type: "application/json" });
     if (navigator.canShare && navigator.canShare({ files: [file] }) && /iPhone|iPad|Android/i.test(navigator.userAgent)) {
-      await navigator.share({ files: [file], title: "Lamp & Path backup" });
-      document.getElementById("toast").textContent = "Backup ready.";
+      await navigator.share({ files: [file], title: L.backupTitle });
+      document.getElementById("toast").textContent = L.backupReady;
       return;
     }
   } catch (e) { if (e && e.name === "AbortError") return; }
@@ -555,7 +727,7 @@ async function saveBackup() {
   const a = document.createElement("a");
   a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 2000);
-  document.getElementById("toast").textContent = "Backup saved to your downloads.";
+  document.getElementById("toast").textContent = L.backupDownloaded;
 }
 function readBackup(file) {
   const slot = document.getElementById("backup-slot");
@@ -564,14 +736,14 @@ function readBackup(file) {
     let raw;
     try { raw = JSON.parse(reader.result); } catch (e) { raw = null; }
     if (!raw || raw.app !== "lamp-and-path" || !raw.settings) {
-      slot.innerHTML = `<div class="confirm" role="alert"><p>That file isn’t a Lamp &amp; Path backup. Choose the .json file you saved from this app.</p></div>`;
+      slot.innerHTML = `<div class="confirm" role="alert"><p>${L.notBackup}</p></div>`;
       return;
     }
     pendingRestore = normalize(raw);
     const ticks = pendingRestore.done.replace(/0/g, "").length;
-    const when = raw.savedAt ? new Date(raw.savedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "an earlier date";
-    slot.innerHTML = `<div class="confirm" role="alert"><p>Backup from ${esc(when)}: plan starting ${esc(fmt.longY.format(numToDate(dayNum(pendingRestore.settings.start))))}, ${ticks} day${ticks === 1 ? "" : "s"} with readings marked. This replaces the plan and ticks on this device.</p>
-      <div class="actions"><button class="btn primary" type="button" id="restore-yes">Replace with backup</button><button class="btn" type="button" id="restore-no">Cancel</button></div></div>`;
+    const when = raw.savedAt ? new Date(raw.savedAt).toLocaleDateString(L.locale, { day: "numeric", month: "long", year: "numeric" }) : L.earlier;
+    slot.innerHTML = `<div class="confirm" role="alert"><p>${L.restoreSummary(esc(when), esc(fmt.longY.format(numToDate(dayNum(pendingRestore.settings.start)))), ticks)}</p>
+      <div class="actions"><button class="btn primary" type="button" id="restore-yes">${L.replace}</button><button class="btn" type="button" id="restore-no">${L.cancel}</button></div></div>`;
   };
   reader.readAsText(file);
 }
@@ -586,7 +758,7 @@ planView.addEventListener("click", e => {
     commit();
     ui.dirty = false; ui.day = null; ui.monthKey = null; draft = null;
     renderPlan(true);
-    document.getElementById("toast").textContent = "Backup restored.";
+    document.getElementById("toast").textContent = L.restored;
   }
 });
 
@@ -610,7 +782,8 @@ function setupPWA() {
   });
   const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   if (isIOS && !standalone && !dismissed) {
-    document.getElementById("install-text").innerHTML = "To install on iPhone or iPad, tap <b>Share</b>, then <b>Add to Home Screen</b>.";
+    installIOS = true;
+    document.getElementById("install-text").innerHTML = L.installIOS;
     document.getElementById("install-now").hidden = true;
     banner.hidden = false;
   }

@@ -21,6 +21,8 @@ That is how installed copies learn a new version exists; they then show a "Reloa
 
 ## Data
 
+The app is in English or French (where it is called Le Sentier); the EN/FR button in the header switches language.
+
 Progress is stored in the browser on each device (localStorage). Settings › Backup saves and
 restores a `.json` file to move progress between devices.
 
