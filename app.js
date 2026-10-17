@@ -213,8 +213,7 @@ function readingCard(t, d) {
     <p class="ref">${esc(c.text)}</p>
     <div class="meta"><span class="num">${n0.format(c.n)} verse${c.n === 1 ? "" : "s"}</span>
       <a href="${gatewayURL(c.query)}" target="_blank" rel="noopener">Read in ${esc(state.settings.version)} ↗</a></div>
-    <button class="tick" type="button" aria-pressed="${on}" data-toggle="${t}" data-day="${d}">
-      <span class="box">${CHECK}</span>${on ? "Read" : "Mark as read"}</button>
+    <button class="tick" type="button" aria-pressed="${on}" data-toggle="${t}" data-day="${d}" aria-label="${TNAME[t]}: ${esc(c.text)}, ${on ? "read" : "mark as read"}">${CHECK}</button>
   </article>`;
 }
 function renderToday() {
@@ -262,10 +261,11 @@ function renderToday() {
     <section class="readings">${readingCard("ot", d)}${readingCard("nt", d)}</section>
     <section class="progress" aria-labelledby="pr-h">
       <h3 class="section-title" id="pr-h">Progress</h3>
-      ${["ot", "nt"].map(t => `<div class="ribbon ${t}">
-        <div class="row"><span>${TNAME[t]}</span><span class="num">${n0.format(s[t].read)} of ${n0.format(s[t].total)} verses · ${pct(s[t])}%</span></div>
+      <div class="ribbons">${["ot", "nt"].map(t => `<div class="ribbon ${t}">
+        <span class="name">${TNAME[t]}</span>
         <div class="bar" role="progressbar" aria-label="${TNAME[t]} progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct(s[t])}"><div class="fill" style="width:${pct(s[t])}%"></div></div>
-      </div>`).join("")}
+        <span class="count num">${n0.format(s[t].read)} of ${n0.format(s[t].total)} verses</span>
+      </div>`).join("")}</div>
       <div class="facts num">
         <div><strong>${n0.format(s.daysDone)}</strong>days complete</div>
         <div><strong>${n0.format(Math.max(0, P.days - s.daysDone))}</strong>days to go</div>
@@ -433,7 +433,7 @@ const THEMES = {
   light: { next: "dark", label: "Light", icon: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>' },
   dark: { next: "system", label: "Dark", icon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>' }
 };
-const THEME_COLOR = { light: "#F1F3EF", dark: "#111514" };
+const THEME_COLOR = { light: "#EDEFEA", dark: "#111513" };
 function applyTheme(theme) {
   const root = document.documentElement;
   if (theme === "system") delete root.dataset.theme; else root.dataset.theme = theme;

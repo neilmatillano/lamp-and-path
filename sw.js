@@ -1,11 +1,11 @@
 // Lamp & Path service worker: keeps the whole app on the device so it opens offline.
-const VERSION = "lamp-theme-1";
+const VERSION = "lamp-tinted-1";
 const SHELL = [
   "/", "/app.js", "/manifest.webmanifest",
   "/icons/icon-192.png", "/icons/icon.svg", "/icons/icon-maskable.svg", "/icons/apple-touch-icon.png", "/icons/favicon-64.png"
 ];
-const FONT_CSS = "https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,500&family=Alegreya+Sans:wght@400;500;700&display=swap";
-const FONT_CACHE = "lamp-fonts-v1";
+const FONT_CSS = "https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,500;0,7..72,700;1,7..72,500&family=Figtree:wght@400;500;600;700&display=swap";
+const FONT_CACHE = "lamp-fonts-v2";
 
 // Fetch the Google Fonts stylesheet and every font file it points to, so text looks right offline.
 async function cacheFonts() {
