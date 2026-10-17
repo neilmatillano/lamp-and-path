@@ -243,7 +243,7 @@ function renderToday() {
           return `<button class="chk ${t}" type="button" aria-pressed="${on}" data-toggle="${t}" data-day="${b}" aria-label="${TNAME[t]}, day ${b + 1}: ${on ? "read" : "not read"}">${CHECK}</button>`; }).join("");
         return `<li><div class="refs"><div class="when num">Day ${b + 1} · ${fmt.longY.format(dateOf(b))}</div>${lines}</div><div class="mini">${btns}</div></li>`;
       }).join("")}</ul>
-      ${s.behind.length > 5 ? `<button class="btn quiet" type="button" data-goto="schedule-first-open">See all ${s.behind.length} in the schedule</button>` : ""}
+      ${s.behind.length > 5 ? `<button class="btn quiet" type="button" data-goto="schedule-first-open">See all ${s.behind.length} in the calendar</button>` : ""}
     </section>` : "";
 
   const pct = (x) => x.total ? Math.round(x.read / x.total * 1000) / 10 : 0;

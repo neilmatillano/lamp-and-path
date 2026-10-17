@@ -21,7 +21,7 @@ That is how installed copies learn a new version exists; they then show a "Reloa
 
 ## Data
 
-Progress is stored in the browser on each device (localStorage). Plan › Backup saves and
+Progress is stored in the browser on each device (localStorage). Settings › Backup saves and
 restores a `.json` file to move progress between devices.
 
 Verse counts follow modern English Bibles (NIV/ESV): 23,145 OT and 7,958 NT verses.
