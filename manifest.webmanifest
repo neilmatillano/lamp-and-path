@@ -1,0 +1,37 @@
+{
+  "name": "Lamp & Path",
+  "short_name": "Lamp & Path",
+  "description": "A daily Bible reading plan with an Old and a New Testament passage every day.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F1F3EF",
+  "theme_color": "#F1F3EF",
+  "categories": [
+    "books",
+    "lifestyle",
+    "education"
+  ],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
