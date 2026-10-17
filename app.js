@@ -103,7 +103,7 @@ function chunk(P, t, d) {
 //</core>
 
 // [Bible Gateway code, name, language of the translation when it isn't English]
-const VERSIONS = [["NIV","New International Version"],["ESV","English Standard Version"],["KJV","King James Version"],["NKJV","New King James Version"],["NLT","New Living Translation"],["CSB","Christian Standard Bible"],["NASB1995","New American Standard 1995"],["LSG","Louis Segond","fr"],["SG21","Segond 21","fr"],["BDS","Bible du Semeur","fr"],["MBBTAG","Magandang Balita Biblia","tl"],["ADB1905","Ang Dating Biblia","tl"]];
+const VERSIONS = [["NIV","New International Version"],["ESV","English Standard Version"],["KJV","King James Version"],["NKJV","New King James Version"],["NLT","New Living Translation"],["CSB","Christian Standard Bible"],["NASB1995","New American Standard 1995"],["RCV","Recovery Version"],["LSG","Louis Segond","fr"],["SG21","Segond 21","fr"],["BDS","Bible du Semeur","fr"],["MBBTAG","Magandang Balita Biblia","tl"],["ADB1905","Ang Dating Biblia","tl"]];
 const BIT = { ot: 1, nt: 2 };
 const LOCAL_KEY = "lamp-path-plan-v1";
 const TAB_KEY = "lamp-path-tab";
@@ -322,6 +322,14 @@ function dateOf(d) { return numToDate(dayNum(state.settings.start) + d); }
 const CHECK = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.4 4.8 9 10 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 function gatewayURL(q) { return "https://www.biblegateway.com/passage/?search=" + encodeURIComponent(q) + "&version=" + encodeURIComponent(state.settings.version); }
+// The Recovery Version isn't on Bible Gateway; its own site has one page per chapter, with an anchor per verse
+const RCV_ABBR = "Gen Exo Lev Num Deu Jos Jud Rut FSa SSa FKi SKi FCh SCh Ezr Neh Est Job Psa Pro Ecc Son Isa Jer Lam Eze Dan Hos Joe Amo Oba Jon Mic Nah Hab Zep Hag Zec Mal Mat Mar Luk Joh Act Rom FCo SCo Gal Eph Phi Col FTh STh FTi STi Tit Phm Heb Jam FPe SPe FJo SJo TJo Jde Rev".split(" ");
+function rcvURL(t, c) {
+  const r = locate(t, c.firstIndex), n = (t === "ot" ? 0 : 39) + r.b;
+  const slug = NAMES[n] === "Song of Solomon" ? "SongofSongs" : NAMES[n].replace(/ /g, "");
+  return `https://text.recoveryversion.bible/${String(n + 1).padStart(2, "0")}_${slug}_${r.c}.htm#${RCV_ABBR[n]}${r.c}-${r.v}`;
+}
+function readingURL(t, c) { return state.settings.version === "RCV" ? rcvURL(t, c) : gatewayURL(c.query); }
 
 /* ---------- Today ---------- */
 function stats() {
@@ -352,7 +360,7 @@ function readingCard(t, d) {
     <div class="label"><p class="eyebrow">${TNAME[t]}</p>${passTag}</div>
     <p class="ref">${esc(c.text)}</p>
     <div class="meta"><span class="num">${L.verses(c.n, n0.format(c.n))}</span>
-      <a href="${gatewayURL(c.query)}" target="_blank" rel="noopener">${L.readIn(esc(state.settings.version))}</a></div>
+      <a href="${readingURL(t, c)}" target="_blank" rel="noopener">${L.readIn(esc(state.settings.version))}</a></div>
     <button class="tick" type="button" aria-pressed="${on}" data-toggle="${t}" data-day="${d}" aria-label="${TNAME[t]}: ${esc(c.text)}, ${on ? L.read : L.markRead}">${CHECK}</button>
   </article>`;
 }
