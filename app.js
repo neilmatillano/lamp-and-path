@@ -108,6 +108,7 @@ const VERSIONS = [["NIV","New International Version","en"],["ESV","English Stand
   ["MBBTAG","Magandang Balita Biblia","tl"],["ADB1905","Ang Dating Biblia","tl"]];
 const BIT = { ot: 1, nt: 2 };
 const LOCAL_KEY = "lamp-path-plan-v1";
+const PLANS_KEY = "lamp-path-plans-v2";
 const TAB_KEY = "lamp-path-tab";
 const THEME_KEY = "lamp-path-theme";
 const LANG_KEY = "lamp-path-lang";
@@ -144,6 +145,10 @@ const I18N = {
     progress: "Progress", progressOf: name => `${name} progress`, versesOf: (a, b) => `${a} of ${b} verses`,
     daysComplete: "days complete", daysToGo: "days to go", lastDay: y => `last day, ${y}`,
     prevMonth: "Previous month", nextMonth: "Next month", thisMonth: "Jump to this month",
+    viewLabel: "Schedule view", week: "Week", month: "Month",
+    prevWeek: "Previous week", nextWeek: "Next week", thisWeek: "Jump to this week",
+    weekDone: (a, b) => `${a} of ${b} ${s_(b, "day", "days")} read this week`,
+    partRead: "partly read",
     book: "Book", chapter: "Chapter", verse: "Verse",
     whenStart: "When to start", firstDay: "First day",
     whereStart: "Where to start", whereHint: "Each testament runs to its last book, then carries on from its first book, so the whole testament is covered.",
@@ -154,7 +159,7 @@ const I18N = {
     modePace: "Read a set number of verses each day",
     repeat: "When one testament finishes first, start it again so every day keeps both readings.",
     links: "Reading links", openIn: "Open passages in",
-    backup: "Backup", backupHint: "Your plan and ticks live on this device. Save a backup file to keep them safe or to carry on from another phone or computer.",
+    backup: "Backup", backupHint: "Your plans and ticks live on this device. Save a backup file to keep them safe or to carry on from another phone or computer.",
     saveBackup: "Save a backup", restoreBackup: "Restore from backup",
     savePlan: "Save plan", discard: "Discard changes",
     preview: (a, b, d) => `About ${a} Old Testament and ${b} New Testament verses a day, for ${d} ${s_(d, "day", "days")}.`,
@@ -172,6 +177,33 @@ const I18N = {
     replace: "Replace with backup", cancel: "Cancel", restored: "Backup restored.",
     themes: { system: "System", light: "Light", dark: "Dark" },
     appearance: (a, b) => `Appearance: ${a}. Switch to ${b}`, appearanceShort: a => `Appearance: ${a}`,
+    myPlan: "My plan", groupPlan: "Group plan", plansNav: "Your plans", addPlan: "Add a plan",
+    thisPlan: "This plan", planName: "Name", planNamePh: "e.g. Sunday group",
+    memberLocked: "This schedule is set by the group, so everyone reads the same passages each day. If the group changes it, open the new link you’re sent.",
+    groupTitle: "Read with a group",
+    groupHint: "Share this schedule with a link. Everyone who opens it reads the same passages each day and ticks them off on their own phone. Nobody sees anyone else’s ticks.",
+    makeGroup: "Share as a group plan", inviteLabel: "Invite link", copyLink: "Copy link", shareLink: "Share…",
+    copied: "Link copied.", copyFailed: "Select the link and copy it.",
+    shareText: n => `Join “${n}” on Le Sentier: the same Bible reading each day, Old and New Testament.`,
+    leaderHint: "If you change the start or the pace, send the new link. Members who open it can switch to the updated schedule.",
+    stopSharing: "Make it a personal plan again", stoppedSharing: "This is a personal plan again. Members keep their copy.",
+    memberHint: "You joined this group plan. Your ticks stay on this device.", leaveGroup: "Leave this group",
+    plansHint: "Keep several plans side by side, for example your own and one for each group. Each has its own schedule and ticks.",
+    newPlan: "New personal plan", joinGroup: "Join a group", joinPh: "Paste the invite link", joinGo: "Join",
+    badInvite: "That isn’t a Le Sentier invite link. Paste the whole link you were sent.",
+    deletePlan: "Delete this plan",
+    confirmDelete: n => `Delete “${n}” and its ticks from this device? This can’t be undone.`, deleteYes: "Delete plan",
+    planAdded: "New plan added. Set its start and pace below.", groupMade: "Group plan ready. Send the link to your group.",
+    groupInvite: "Group invite",
+    inviteSummary: (d, n, f, e) => `Starts ${d} · ${f} ${s_(n, "day", "days")} · ends ${e}`,
+    inviteDay1: (x, y) => `Day 1: ${x} and ${y}`,
+    joinBtn: "Join this group", openPlan: "Open plan", close: "Close", updatePlan: "Update my plan",
+    alreadyIn: "You’re already in this group, on the same schedule.",
+    inviteChanged: "You’re in this group, but its schedule has changed.",
+    inviteChangedTicks: n => `Updating clears your ${n} ticked ${s_(n, "day", "days")}.`,
+    inviteOwn: "This is the link to your own group.",
+    inviteIOS: "On iPhone, links open in Safari, not in the installed app. To join in the app, open Le Sentier from your Home Screen and paste this link under Settings › Your plans › Join a group.",
+    restoreSummaryAll: (w, n, t) => `Backup from ${w}: ${n} ${s_(n, "plan", "plans")}, ${t} ${s_(t, "day", "days")} with readings marked. This replaces all plans and ticks on this device.`,
   },
   fr: {
     locale: "fr-FR", code: "FR", switchTo: "Passer en français",
@@ -202,6 +234,10 @@ const I18N = {
     progress: "Progression", progressOf: name => `Progression : ${name}`, versesOf: (a, b) => `${a} sur ${b} versets`,
     daysComplete: "jours terminés", daysToGo: "jours restants", lastDay: y => `dernier jour, ${y}`,
     prevMonth: "Mois précédent", nextMonth: "Mois suivant", thisMonth: "Aller au mois en cours",
+    viewLabel: "Affichage du programme", week: "Semaine", month: "Mois",
+    prevWeek: "Semaine précédente", nextWeek: "Semaine suivante", thisWeek: "Aller à la semaine en cours",
+    weekDone: (a, b) => `${a} sur ${b} ${s_(b, "jour lu", "jours lus")} cette semaine`,
+    partRead: "lu en partie",
     book: "Livre", chapter: "Chapitre", verse: "Verset",
     whenStart: "Quand souhaitez-vous commencer ?", firstDay: "Date de début",
     whereStart: "Par où commencer ?", whereHint: "Pour lire chaque testament en entier, la lecture commence au livre sélectionné, se poursuit jusqu’au dernier, puis reprend au premier.",
@@ -212,7 +248,7 @@ const I18N = {
     modePace: "Lire un nombre fixe de versets par jour",
     repeat: "Quand un testament se termine en premier, le recommencer pour garder les deux lectures chaque jour.",
     links: "Liens de lecture", openIn: "Ouvrir les passages dans",
-    backup: "Sauvegarde", backupHint: "Votre plan et vos coches sont enregistrés sur cet appareil. Enregistrez un fichier de sauvegarde pour les protéger ou pour continuer sur un autre téléphone ou ordinateur.",
+    backup: "Sauvegarde", backupHint: "Vos plans et vos coches sont enregistrés sur cet appareil. Enregistrez un fichier de sauvegarde pour les protéger ou pour continuer sur un autre téléphone ou ordinateur.",
     saveBackup: "Enregistrer une sauvegarde", restoreBackup: "Restaurer une sauvegarde",
     savePlan: "Enregistrer le plan", discard: "Annuler les modifications",
     preview: (a, b, d) => `Environ ${a} versets de l’Ancien Testament et ${b} du Nouveau Testament par jour, pendant ${d} ${s_(d, "jour", "jours")}.`,
@@ -230,6 +266,33 @@ const I18N = {
     replace: "Remplacer par la sauvegarde", cancel: "Annuler", restored: "Sauvegarde restaurée.",
     themes: { system: "Système", light: "Clair", dark: "Sombre" },
     appearance: (a, b) => `Apparence : ${a}. Passer à ${b}`, appearanceShort: a => `Apparence : ${a}`,
+    myPlan: "Mon plan", groupPlan: "Plan de groupe", plansNav: "Vos plans", addPlan: "Ajouter un plan",
+    thisPlan: "Ce plan", planName: "Nom", planNamePh: "ex. Groupe du dimanche",
+    memberLocked: "Ce programme est fixé par le groupe : chacun lit les mêmes passages chaque jour. Si le groupe le modifie, ouvrez le nouveau lien que vous recevrez.",
+    groupTitle: "Lire en groupe",
+    groupHint: "Partagez ce programme avec un lien. Chaque personne qui l’ouvre lit les mêmes passages chaque jour et coche ses lectures sur son propre téléphone. Personne ne voit les coches des autres.",
+    makeGroup: "Partager comme plan de groupe", inviteLabel: "Lien d’invitation", copyLink: "Copier le lien", shareLink: "Partager…",
+    copied: "Lien copié.", copyFailed: "Sélectionnez le lien pour le copier.",
+    shareText: n => `Rejoignez « ${n} » sur Le Sentier : la même lecture biblique chaque jour, Ancien et Nouveau Testament.`,
+    leaderHint: "Si vous changez le début ou le rythme, envoyez le nouveau lien. Les membres qui l’ouvrent pourront passer au programme mis à jour.",
+    stopSharing: "Revenir à un plan personnel", stoppedSharing: "C’est de nouveau un plan personnel. Les membres gardent leur copie.",
+    memberHint: "Vous avez rejoint ce plan de groupe. Vos coches restent sur cet appareil.", leaveGroup: "Quitter ce groupe",
+    plansHint: "Gardez plusieurs plans côte à côte, par exemple le vôtre et un pour chaque groupe. Chacun a son programme et ses coches.",
+    newPlan: "Nouveau plan personnel", joinGroup: "Rejoindre un groupe", joinPh: "Collez le lien d’invitation", joinGo: "Rejoindre",
+    badInvite: "Ce n’est pas un lien d’invitation du Sentier. Collez le lien complet que vous avez reçu.",
+    deletePlan: "Supprimer ce plan",
+    confirmDelete: n => `Supprimer « ${n} » et ses coches de cet appareil ? Cette action est définitive.`, deleteYes: "Supprimer le plan",
+    planAdded: "Nouveau plan ajouté. Réglez son début et son rythme ci-dessous.", groupMade: "Plan de groupe prêt. Envoyez le lien à votre groupe.",
+    groupInvite: "Invitation de groupe",
+    inviteSummary: (d, n, f, e) => `Début le ${d} · ${f} ${s_(n, "jour", "jours")} · fin le ${e}`,
+    inviteDay1: (x, y) => `Jour 1 : ${x} et ${y}`,
+    joinBtn: "Rejoindre ce groupe", openPlan: "Ouvrir le plan", close: "Fermer", updatePlan: "Mettre à jour mon plan",
+    alreadyIn: "Vous êtes déjà dans ce groupe, avec le même programme.",
+    inviteChanged: "Vous êtes dans ce groupe, mais son programme a changé.",
+    inviteChangedTicks: n => `La mise à jour efface ${s_(n, "votre jour coché", `vos ${n} jours cochés`)}.`,
+    inviteOwn: "C’est le lien de votre propre groupe.",
+    inviteIOS: "Sur iPhone, les liens s’ouvrent dans Safari et non dans l’app installée. Pour rejoindre le groupe dans l’app, ouvrez Le Sentier depuis l’écran d’accueil et collez ce lien dans Réglages › Vos plans › Rejoindre un groupe.",
+    restoreSummaryAll: (w, n, t) => `Sauvegarde du ${w} : ${n} ${s_(n, "plan", "plans")}, ${t} ${s_(t, "jour coché", "jours cochés")}. Elle remplacera tous les plans et toutes les coches de cet appareil.`,
   },
 };
 let lang = "en";
@@ -257,6 +320,8 @@ function makeFormats() {
     dow: new Intl.DateTimeFormat(loc, { weekday: "short", timeZone: "UTC" }),
     dm: new Intl.DateTimeFormat(loc, { day: "numeric", month: "short", timeZone: "UTC" }),
     month: new Intl.DateTimeFormat(loc, { month: "long", year: "numeric", timeZone: "UTC" }),
+    range: new Intl.DateTimeFormat(loc, { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }),
+    dnum: new Intl.DateTimeFormat(loc, { day: "numeric", timeZone: "UTC" }),
   };
   n0 = new Intl.NumberFormat(loc);
 }
@@ -290,13 +355,42 @@ function normalize(raw) {
   if (!VERSIONS.some(v => v[0] === s.version)) s.version = "NIV";
   return { settings: s, done: typeof raw.done === "string" ? raw.done.replace(/[^0-3]/g, "0") : "", updatedAt: Number(raw.updatedAt) || 0 };
 }
+// v1 kept one plan under LOCAL_KEY; v2 keeps several under PLANS_KEY: { activeId, plans: [{ id, name, group, settings, done, updatedAt }] }
+// group is null for a personal plan, or { id, role: "leader" | "member" } for a plan shared by invite link
 function loadLocal() { try { const r = localStorage.getItem(LOCAL_KEY); return r ? normalize(JSON.parse(r)) : null; } catch (e) { return null; } }
-function saveLocal() { try { localStorage.setItem(LOCAL_KEY, JSON.stringify(state)); } catch (e) {} }
+const ID_RE = /^[A-Za-z0-9_-]{1,40}$/;
+function newId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function normalizePlan(raw) {
+  const p = normalize(raw);
+  p.id = raw && typeof raw.id === "string" && ID_RE.test(raw.id) ? raw.id : newId();
+  p.name = raw && typeof raw.name === "string" ? raw.name.trim().slice(0, 60) : "";
+  const g = raw && raw.group;
+  p.group = g && typeof g.id === "string" && ID_RE.test(g.id) ? { id: g.id, role: g.role === "leader" ? "leader" : "member" } : null;
+  return p;
+}
+function loadStore() {
+  try {
+    const r = localStorage.getItem(PLANS_KEY);
+    if (r) {
+      const s = JSON.parse(r);
+      const plans = (Array.isArray(s && s.plans) ? s.plans : []).map(normalizePlan);
+      if (plans.length) return { plans, activeId: plans.some(p => p.id === s.activeId) ? s.activeId : plans[0].id };
+    }
+  } catch (e) {}
+  const old = loadLocal();
+  if (old) { const p = normalizePlan(old); return { plans: [p], activeId: p.id }; }
+  return null;
+}
+function saveLocal() { try { localStorage.setItem(PLANS_KEY, JSON.stringify(store)); } catch (e) {} }
 
-let state = loadLocal();
-if (!state) { state = defaultState(); state.updatedAt = 1; saveLocal(); } // fix the start date on first open
+let store = loadStore();
+if (!store) { const p = normalizePlan(defaultState()); p.updatedAt = 1; store = { plans: [p], activeId: p.id }; } // fixes the start date on first open
+let state = store.plans.find(p => p.id === store.activeId);
+saveLocal();
 let P = derive(state.settings);
-const ui = { tab: "today", day: null, monthKey: null, dirty: false };
+const SCHED_KEY = "lamp-path-schedule-view";
+const ui = { tab: "today", day: null, monthKey: null, weekKey: null, schedView: "month", dirty: false, invite: null };
+try { if (localStorage.getItem(SCHED_KEY) === "week") ui.schedView = "week"; } catch (e) {}
 try { const t = localStorage.getItem(TAB_KEY); if (t === "schedule" || t === "plan") ui.tab = t; } catch (e) {}
 
 function getMask(d) { const c = state.done.charCodeAt(d); return c >= 48 && c <= 51 ? c - 48 : 0; }
@@ -347,6 +441,107 @@ function youversionURL(t, c, v) {
 function readingURL(t, c) {
   const v = state.settings.version;
   return v === "RCV" ? rcvURL(t, c) : YOUVERSION[v] ? youversionURL(t, c, v) : gatewayURL(c.query);
+}
+
+/* ---------- plans: personal plans and group plans shared by link ---------- */
+const GROUP_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14c2.5 0 4 1.4 4.5 4"/></svg>';
+const PLUS_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
+const isIOSDevice = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const isStandalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+function planLabel(p) { return p.name || (p.group ? L.groupPlan : L.myPlan); }
+function activate(p) {
+  store.activeId = p.id; state = p; P = derive(p.settings);
+  ui.day = null; ui.monthKey = null; ui.weekKey = null; ui.dirty = false; draft = null;
+  saveLocal();
+}
+function switchPlan(id) {
+  const p = store.plans.find(x => x.id === id);
+  if (!p || p === state) return;
+  activate(p); renderPlanBar(); renderAll();
+}
+function addPlan(p) { store.plans.push(p); activate(p); renderPlanBar(); }
+function removeActivePlan() {
+  if (store.plans.length < 2) return;
+  store.plans = store.plans.filter(p => p !== state);
+  activate(store.plans[0]); renderPlanBar();
+}
+function renderPlanBar() {
+  document.getElementById("planbar").innerHTML = store.plans.map(p =>
+    `<button type="button" class="planchip" data-plan="${p.id}" aria-pressed="${p === state}">${p.group ? GROUP_ICON : ""}<span>${esc(planLabel(p))}</span></button>`).join("")
+    + `<button type="button" class="planchip add" data-plans-manage>${PLUS_ICON}<span>${L.addPlan}</span></button>`;
+  document.getElementById("planbar").setAttribute("aria-label", L.plansNav);
+}
+
+// An invite carries the group's id, name and schedule; it never carries anyone's ticks.
+const b64u = {
+  enc: s => btoa(unescape(encodeURIComponent(s))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""),
+  dec: s => decodeURIComponent(escape(atob(s.replace(/-/g, "+").replace(/_/g, "/")))),
+};
+function inviteCode(p) {
+  const s = p.settings;
+  return b64u.enc(JSON.stringify({ v: 1, id: p.group.id, n: p.name, s: s.start, o: [s.ot.b, s.ot.c, s.ot.v], t: [s.nt.b, s.nt.c, s.nt.v],
+    m: s.mode === "pace" ? "p" : "d", d: s.days, op: s.otPer, np: s.ntPer, r: s.repeat ? 1 : 0, b: s.version }));
+}
+function inviteLink(p) { return location.origin + "/#join=" + inviteCode(p); }
+function parseInvite(text) {
+  const str = String(text || "");
+  const m = str.match(/join=([A-Za-z0-9_-]{20,})/) || str.trim().match(/^([A-Za-z0-9_-]{20,})$/);
+  if (!m) return null;
+  try {
+    const j = JSON.parse(b64u.dec(m[1]));
+    if (!j || j.v !== 1 || typeof j.id !== "string" || !ID_RE.test(j.id)) return null;
+    const ref = a => Array.isArray(a) ? { b: a[0], c: a[1], v: a[2] } : null;
+    const p = normalizePlan({ name: typeof j.n === "string" ? j.n : "", group: { id: j.id, role: "member" }, done: "",
+      settings: { start: j.s, ot: ref(j.o), nt: ref(j.t), mode: j.m === "p" ? "pace" : "days", days: j.d, otPer: j.op, ntPer: j.np, repeat: j.r !== 0, version: j.b } });
+    p.updatedAt = Date.now();
+    return p;
+  } catch (e) { return null; }
+}
+function clearInvite() {
+  ui.invite = null;
+  if (/join=/.test(location.hash)) history.replaceState(null, "", location.pathname + location.search);
+  renderJoin();
+}
+function renderJoin() {
+  const el = document.getElementById("join-slot"), inv = ui.invite;
+  el.hidden = !inv;
+  if (!inv) { el.innerHTML = ""; return; }
+  const mine = store.plans.find(p => p.group && p.group.id === inv.group.id);
+  const Q = derive(inv.settings), start = dayNum(inv.settings.start);
+  const c0 = chunk(Q, "ot", 0), c1 = chunk(Q, "nt", 0);
+  const btn = (k, label, primary) => `<button class="btn${primary ? " primary" : ""}" type="button" data-join="${k}">${label}</button>`;
+  let status = "", buttons;
+  if (mine && mine.group.role === "leader") { status = L.inviteOwn; buttons = btn("open", L.openPlan, true) + btn("dismiss", L.close); }
+  else if (mine && !shapeChanged(mine.settings, inv.settings)) { status = L.alreadyIn; buttons = btn("open", L.openPlan, true) + btn("dismiss", L.close); }
+  else if (mine) {
+    const ticks = mine.done.replace(/0/g, "").length;
+    status = L.inviteChanged + (ticks ? " " + L.inviteChangedTicks(ticks) : "");
+    buttons = btn("update", L.updatePlan, true) + btn("dismiss", L.notNow);
+  } else buttons = btn("join", L.joinBtn, true) + btn("dismiss", L.notNow);
+  el.innerHTML = `<section class="join" aria-labelledby="join-h">
+    <p class="eyebrow">${GROUP_ICON}${L.groupInvite}</p>
+    <h2 id="join-h">${esc(planLabel(inv))}</h2>
+    <p class="num">${L.inviteSummary(fmt.longY.format(numToDate(start)), Q.days, n0.format(Q.days), fmt.longY.format(numToDate(start + Q.days - 1)))}</p>
+    <p class="hint">${L.inviteDay1(esc(c0 && c0.text || "—"), esc(c1 && c1.text || "—"))}</p>
+    ${status ? `<p class="status">${status}</p>` : ""}
+    ${isIOSDevice && !isStandalone && !mine ? `<p class="hint">${L.inviteIOS}</p>` : ""}
+    <div class="actions">${buttons}</div>
+  </section>`;
+}
+function acceptInvite(kind) {
+  const inv = ui.invite;
+  if (!inv) return;
+  const mine = store.plans.find(p => p.group && p.group.id === inv.group.id);
+  if (kind === "join" && !mine) addPlan(inv);
+  else if (kind === "update" && mine) {
+    if (shapeChanged(mine.settings, inv.settings)) mine.done = "";
+    mine.settings = Object.assign({}, inv.settings, { version: mine.settings.version });
+    mine.name = inv.name;
+    activate(mine); commit(); renderPlanBar();
+  } else if (kind === "open" && mine) { activate(mine); renderPlanBar(); }
+  clearInvite();
+  showTab("today");
+  window.scrollTo(0, 0);
 }
 
 /* ---------- Today ---------- */
@@ -443,35 +638,81 @@ function renderToday() {
 
 /* ---------- Schedule ---------- */
 function monthKeyOf(d) { const dt = dateOf(d); return dt.getUTCFullYear() * 12 + dt.getUTCMonth(); }
+// weeks run Sunday to Saturday; a week is keyed by its Sunday's day number
+function weekStart(n) { return n - numToDate(n).getUTCDay(); }
+function weekKeyOf(d) { return weekStart(dayNum(state.settings.start) + d); }
+function dayState(d) {
+  let any = false, all = true, has = false;
+  for (const t of ["ot", "nt"]) {
+    const c = chunk(P, t, d);
+    if (!c || !c.text) continue;
+    has = true;
+    if (getMask(d) & BIT[t]) any = true; else all = false;
+  }
+  return !has || all ? "done" : any ? "part" : "open";
+}
+function scheduleRow(d, ti) {
+  const dt = dateOf(d);
+  const lines = ["ot", "nt"].map(t => {
+    const c = chunk(P, t, d);
+    if (!c || !c.text) return `<div class="line ${t}"><span></span><span class="t" style="color:var(--muted)">${c && c.finished ? L.finished(t) : "—"}</span></div>`;
+    const on = (getMask(d) & BIT[t]) !== 0;
+    return `<div class="line ${t}${on ? " done" : ""}"><button class="chk" type="button" aria-pressed="${on}" data-toggle="${t}" data-day="${d}" aria-label="${TNAME[t]}: ${esc(c.text)}, ${on ? L.read : L.notRead}">${CHECK}</button><span class="t">${esc(c.text)}${c.pass > 1 ? ` <span class="pass" style="--tc:var(--${t});--ts:var(--${t}-soft)">${L.passShort(c.pass)}</span>` : ""}</span></div>`;
+  }).join("");
+  return `<li class="${d === ti ? "today" : ""}" id="row-${d}"><button class="open" type="button" data-open="${d}"><span class="date num"><b>${fmt.dm.format(dt)}</b>${fmt.dow.format(dt)} · ${L.day(d + 1)}</span></button><div class="lines">${lines}</div></li>`;
+}
 function renderSchedule() {
   const el = document.getElementById("view-schedule");
-  const ti = todayIndex();
-  const first = monthKeyOf(0), last = monthKeyOf(P.days - 1);
-  if (ui.monthKey === null) ui.monthKey = monthKeyOf(Math.min(Math.max(ti, 0), P.days - 1));
-  ui.monthKey = Math.min(Math.max(ui.monthKey, first), last);
-  const y = Math.floor(ui.monthKey / 12), m = ui.monthKey % 12;
-  const startN = Math.round(Date.UTC(y, m, 1) / 864e5), endN = Math.round(Date.UTC(y, m + 1, 1) / 864e5) - 1;
-  const base = dayNum(state.settings.start);
-  const from = Math.max(0, startN - base), to = Math.min(P.days - 1, endN - base);
-  const rows = [];
-  for (let d = from; d <= to; d++) {
-    const dt = dateOf(d);
-    const lines = ["ot", "nt"].map(t => {
-      const c = chunk(P, t, d);
-      if (!c || !c.text) return `<div class="line ${t}"><span></span><span class="t" style="color:var(--muted)">${c && c.finished ? L.finished(t) : "—"}</span></div>`;
-      const on = (getMask(d) & BIT[t]) !== 0;
-      return `<div class="line ${t}${on ? " done" : ""}"><button class="chk" type="button" aria-pressed="${on}" data-toggle="${t}" data-day="${d}" aria-label="${TNAME[t]}: ${esc(c.text)}, ${on ? L.read : L.notRead}">${CHECK}</button><span class="t">${esc(c.text)}${c.pass > 1 ? ` <span class="pass" style="--tc:var(--${t});--ts:var(--${t}-soft)">${L.passShort(c.pass)}</span>` : ""}</span></div>`;
-    }).join("");
-    rows.push(`<li class="${d === ti ? "today" : ""}" id="row-${d}"><button class="open" type="button" data-open="${d}"><span class="date num"><b>${fmt.dm.format(dt)}</b>${fmt.dow.format(dt)} · ${L.day(d + 1)}</span></button><div class="lines">${lines}</div></li>`);
+  const ti = todayIndex(), base = dayNum(state.settings.start);
+  const focus = Math.min(Math.max(ti, 0), P.days - 1);
+  const week = ui.schedView === "week";
+  const seg = `<div class="seg" role="group" aria-label="${L.viewLabel}">
+      <button type="button" data-sview="week" aria-pressed="${week}">${L.week}</button>
+      <button type="button" data-sview="month" aria-pressed="${!week}">${L.month}</button></div>`;
+  let from, to, title, atFirst, atLast, navAttr, prevLabel, nextLabel, jumpLabel, strip = "";
+  if (week) {
+    const first = weekKeyOf(0), last = weekKeyOf(P.days - 1);
+    if (ui.weekKey === null) ui.weekKey = weekKeyOf(focus);
+    ui.weekKey = Math.min(Math.max(ui.weekKey, first), last);
+    const a = ui.weekKey, z = a + 6;
+    from = Math.max(0, a - base); to = Math.min(P.days - 1, z - base);
+    title = fmt.range.formatRange ? fmt.range.formatRange(numToDate(a), numToDate(z)) : `${fmt.range.format(numToDate(a))} – ${fmt.range.format(numToDate(z))}`;
+    atFirst = a <= first; atLast = a >= last; navAttr = "data-week";
+    prevLabel = L.prevWeek; nextLabel = L.nextWeek; jumpLabel = L.thisWeek;
+    let inPlan = 0, read = 0;
+    const cells = [];
+    for (let i = 0; i < 7; i++) {
+      const n = a + i, d = n - base, dt = numToDate(n);
+      const inside = d >= 0 && d < P.days;
+      const st = inside ? dayState(d) : "out";
+      if (inside) { inPlan++; if (st === "done") read++; }
+      const label = `${cap(fmt.long.format(dt))}${inside ? `, ${st === "done" ? L.read : st === "part" ? L.partRead : L.notRead}` : ""}`;
+      cells.push(`<li class="wday ${st}${d === ti ? " today" : ""}">${inside ? `<button type="button" data-open="${d}" aria-label="${esc(label)}">` : `<span aria-hidden="true">`}<span class="dow">${fmt.dow.format(dt)}</span><span class="dn num">${fmt.dnum.format(dt)}</span><span class="dot" aria-hidden="true"></span>${inside ? "</button>" : "</span>"}</li>`);
+    }
+    strip = `<div class="weekhead"><ol class="weekstrip">${cells.join("")}</ol><p class="hint num">${L.weekDone(n0.format(read), inPlan)}</p></div>`;
+  } else {
+    const first = monthKeyOf(0), last = monthKeyOf(P.days - 1);
+    if (ui.monthKey === null) ui.monthKey = monthKeyOf(focus);
+    ui.monthKey = Math.min(Math.max(ui.monthKey, first), last);
+    const y = Math.floor(ui.monthKey / 12), m = ui.monthKey % 12;
+    const startN = Math.round(Date.UTC(y, m, 1) / 864e5), endN = Math.round(Date.UTC(y, m + 1, 1) / 864e5) - 1;
+    from = Math.max(0, startN - base); to = Math.min(P.days - 1, endN - base);
+    title = cap(fmt.month.format(new Date(Date.UTC(y, m, 1))));
+    atFirst = ui.monthKey <= first; atLast = ui.monthKey >= last; navAttr = "data-month";
+    prevLabel = L.prevMonth; nextLabel = L.nextMonth; jumpLabel = L.thisMonth;
   }
+  const rows = [];
+  for (let d = from; d <= to; d++) rows.push(scheduleRow(d, ti));
   el.innerHTML = `
+    ${seg}
     <div class="monthbar">
-      <button class="btn" type="button" data-month="-1" ${ui.monthKey <= first ? "disabled" : ""} aria-label="${L.prevMonth}">‹</button>
-      <h2>${cap(fmt.month.format(new Date(Date.UTC(y, m, 1))))}</h2>
-      <button class="btn" type="button" data-month="1" ${ui.monthKey >= last ? "disabled" : ""} aria-label="${L.nextMonth}">›</button>
+      <button class="btn" type="button" ${navAttr}="-1" ${atFirst ? "disabled" : ""} aria-label="${prevLabel}">‹</button>
+      <h2 class="num">${title}</h2>
+      <button class="btn" type="button" ${navAttr}="1" ${atLast ? "disabled" : ""} aria-label="${nextLabel}">›</button>
     </div>
+    ${strip}
     <ul class="sched">${rows.join("")}</ul>
-    <div class="actions"><button class="btn quiet" type="button" data-month="today">${L.thisMonth}</button></div>`;
+    <div class="actions"><button class="btn quiet" type="button" ${navAttr}="today">${jumpLabel}</button></div>`;
 }
 
 /* ---------- Plan form ---------- */
@@ -485,20 +726,47 @@ function startFields(t, r) {
     <div class="field ${t}"><label for="${t}-v">${L.verse}</label><select class="small" id="${t}-v" data-ref="${t}" data-part="v">${rangeOptions(B.ch[r.c - 1], r.v)}</select></div>
   </div>`;
 }
+function groupSection() {
+  const g = state.group;
+  if (!g) return `<fieldset id="fs-group">
+      <legend>${L.groupTitle}</legend>
+      <p class="hint">${L.groupHint}</p>
+      <div class="actions"><button class="btn" type="button" id="make-group">${GROUP_ICON}${L.makeGroup}</button></div>
+    </fieldset>`;
+  if (g.role === "member") return `<fieldset id="fs-group">
+      <legend>${L.groupTitle}</legend>
+      <p class="hint">${L.memberHint}</p>
+    </fieldset>`;
+  return `<fieldset id="fs-group">
+      <legend>${L.groupTitle}</legend>
+      <div class="field"><label for="invite-link">${L.inviteLabel}</label>
+        <div class="linkrow"><input type="text" id="invite-link" readonly value="${esc(inviteLink(state))}">
+          <button class="btn primary" type="button" id="copy-link">${L.copyLink}</button>
+          ${navigator.share ? `<button class="btn" type="button" id="share-link">${L.shareLink}</button>` : ""}</div></div>
+      <p class="hint">${L.leaderHint}</p>
+      <div class="actions"><button class="btn quiet" type="button" id="stop-sharing">${L.stopSharing}</button></div>
+    </fieldset>`;
+}
 let draft = null;
 function renderPlan(force) {
   const el = document.getElementById("view-plan");
   if (!force && ui.dirty && draft) return;
   draft = draft && ui.dirty ? draft : JSON.parse(JSON.stringify(state.settings));
   const S = draft;
+  const g = state.group, locked = g && g.role === "member" ? "disabled" : "";
   el.innerHTML = `
   <form class="plan" id="plan-form" novalidate>
     <fieldset>
+      <legend>${L.thisPlan}</legend>
+      <div class="field"><label for="plan-name">${L.planName}</label><input type="text" id="plan-name" maxlength="60" autocomplete="off" placeholder="${esc(L.planNamePh)}" value="${esc(state.name)}"></div>
+      ${locked ? `<p class="hint locked">${GROUP_ICON}${L.memberLocked}</p>` : ""}
+    </fieldset>
+    <fieldset ${locked}>
       <legend>${L.whenStart}</legend>
       <div class="fields"><div class="field"><label for="start-date">${L.firstDay}</label><input type="date" id="start-date" value="${S.start}"></div>
       <button class="btn" type="button" id="start-today">${L.today}</button></div>
     </fieldset>
-    <fieldset>
+    <fieldset ${locked}>
       <legend>${L.whereStart}</legend>
       <p class="hint">${L.whereHint}</p>
       <p class="eyebrow" style="color:var(--ot)">${TNAME.ot}</p>
@@ -507,7 +775,7 @@ function renderPlan(force) {
       ${startFields("nt", S.nt)}
       <div class="actions"><button class="btn" type="button" id="resume">${L.resume}</button><span class="hint" id="resume-hint"></span></div>
     </fieldset>
-    <fieldset>
+    <fieldset ${locked}>
       <legend>${L.howMuch}</legend>
       <div class="choice"><input type="radio" name="mode" value="days" id="mode-days" ${S.mode === "days" ? "checked" : ""}>
         <div class="body"><label class="title" for="mode-days">${L.modeDays}</label>
@@ -527,6 +795,22 @@ function renderPlan(force) {
     <fieldset>
       <legend>${L.links}</legend>
       <div class="field"><label for="version">${L.openIn}</label><select id="version">${versionOptions(S.version)}</select></div>
+    </fieldset>
+    ${groupSection()}
+    <fieldset id="fs-plans">
+      <legend>${L.plansNav}</legend>
+      <p class="hint">${L.plansHint}</p>
+      <div class="actions">
+        <button class="btn" type="button" id="new-plan">${PLUS_ICON}${L.newPlan}</button>
+        <button class="btn" type="button" id="join-open" aria-expanded="false" aria-controls="join-box">${GROUP_ICON}${L.joinGroup}</button>
+      </div>
+      <div class="linkrow" id="join-box" hidden>
+        <input type="text" id="join-input" inputmode="url" autocomplete="off" placeholder="${esc(L.joinPh)}" aria-label="${esc(L.joinPh)}">
+        <button class="btn primary" type="button" id="join-go">${L.joinGo}</button>
+        <p class="hint error" id="join-error" role="alert"></p>
+      </div>
+      ${store.plans.length > 1 ? `<div class="actions"><button class="btn quiet danger" type="button" id="delete-plan">${g && g.role === "member" ? L.leaveGroup : L.deletePlan}</button></div>` : ""}
+      <div id="delete-slot"></div>
     </fieldset>
     <fieldset>
       <legend>${L.backup}</legend>
@@ -646,6 +930,7 @@ function setLang(next) {
   makeFormats();
   applyStatic();
   applyTheme(theme);
+  renderPlanBar(); renderJoin();
   if (ui.tab === "plan") renderPlan(true); else renderAll(); // renderPlan keeps unsaved changes
 }
 applyStatic();
@@ -654,10 +939,27 @@ document.getElementById("lang-toggle").addEventListener("click", () => setLang(l
 document.querySelector(".tabs").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (b) showTab(b.dataset.tab); });
 
 document.addEventListener("click", e => {
+  const pc = e.target.closest("[data-plan]");
+  if (pc) { switchPlan(pc.dataset.plan); return; }
+  if (e.target.closest("[data-plans-manage]")) { showTab("plan"); const f = document.getElementById("fs-plans"); if (f) f.scrollIntoView({ block: "start" }); return; }
+  const jn = e.target.closest("[data-join]");
+  if (jn) { if (jn.dataset.join === "dismiss") clearInvite(); else acceptInvite(jn.dataset.join); return; }
   const tg = e.target.closest("[data-toggle]");
   if (tg) { toggle(Number(tg.dataset.day), tg.dataset.toggle); return; }
   const st = e.target.closest("[data-step]");
   if (st) { const n = Number(st.dataset.step); ui.day = n === 0 ? todayIndex() : ui.day + n; renderToday(); return; }
+  const sv = e.target.closest("[data-sview]");
+  if (sv) {
+    ui.schedView = sv.dataset.sview === "week" ? "week" : "month";
+    try { localStorage.setItem(SCHED_KEY, ui.schedView); } catch (e) {}
+    renderSchedule(); return;
+  }
+  const wk = e.target.closest("[data-week]");
+  if (wk) {
+    if (wk.dataset.week === "today") ui.weekKey = weekKeyOf(Math.min(Math.max(todayIndex(), 0), P.days - 1));
+    else ui.weekKey += 7 * Number(wk.dataset.week);
+    renderSchedule(); return;
+  }
   const mo = e.target.closest("[data-month]");
   if (mo) {
     if (mo.dataset.month === "today") ui.monthKey = monthKeyOf(Math.min(Math.max(todayIndex(), 0), P.days - 1));
@@ -667,7 +969,7 @@ document.addEventListener("click", e => {
   const op = e.target.closest("[data-open]");
   if (op) { ui.day = Number(op.dataset.open); showTab("today"); window.scrollTo(0, 0); return; }
   const go = e.target.closest("[data-goto]");
-  if (go) { const s = stats(); ui.monthKey = monthKeyOf(s.behind[0] || 0); showTab("schedule"); const r = document.getElementById("row-" + (s.behind[0] || 0)); if (r) r.scrollIntoView({ block: "center" }); return; }
+  if (go) { const s = stats(); ui.monthKey = monthKeyOf(s.behind[0] || 0); ui.weekKey = weekKeyOf(s.behind[0] || 0); showTab("schedule"); const r = document.getElementById("row-" + (s.behind[0] || 0)); if (r) r.scrollIntoView({ block: "center" }); return; }
 });
 
 const planView = document.getElementById("view-plan");
@@ -675,6 +977,12 @@ function markDirty() { ui.dirty = true; document.getElementById("toast").textCon
 planView.addEventListener("input", e => {
   if (!draft) return;
   const id = e.target.id;
+  if (id === "plan-name") {
+    state.name = e.target.value.slice(0, 60); saveLocal(); renderPlanBar();
+    const link = document.getElementById("invite-link"); if (link) link.value = inviteLink(state);
+    return;
+  }
+  if (id === "join-input") { document.getElementById("join-error").textContent = ""; return; }
   if (id === "start-date" && e.target.value) draft.start = e.target.value;
   else if (id === "days") { draft.days = Math.min(Math.max(1, e.target.value | 0), 3650); draft.mode = "days"; document.getElementById("mode-days").checked = true; }
   else if (id === "ot-per") { draft.otPer = Math.min(Math.max(1, e.target.value | 0), T.ot.total); draft.mode = "pace"; document.getElementById("mode-pace").checked = true; }
@@ -707,6 +1015,51 @@ planView.addEventListener("click", e => {
     return;
   }
   if (e.target.id === "discard") { ui.dirty = false; draft = null; renderPlan(true); return; }
+  const id = (e.target.closest("button") || {}).id;
+  if (id === "new-plan") {
+    const p = normalizePlan(defaultState()); p.settings.version = state.settings.version; p.updatedAt = Date.now();
+    addPlan(p); renderPlan(true);
+    document.getElementById("toast").textContent = L.planAdded;
+    window.scrollTo(0, 0);
+    return;
+  }
+  if (id === "join-open") {
+    const box = document.getElementById("join-box"), open = box.hidden;
+    box.hidden = !open; e.target.closest("button").setAttribute("aria-expanded", String(open));
+    if (open) document.getElementById("join-input").focus();
+    return;
+  }
+  if (id === "join-go") {
+    const inv = parseInvite(document.getElementById("join-input").value);
+    if (!inv) { document.getElementById("join-error").textContent = L.badInvite; return; }
+    ui.invite = inv; renderJoin(); showTab("today"); window.scrollTo(0, 0);
+    return;
+  }
+  if (id === "delete-plan") {
+    document.getElementById("delete-slot").innerHTML = `<div class="confirm" role="alert"><p>${L.confirmDelete(esc(planLabel(state)))}</p>
+      <div class="actions"><button class="btn primary" type="button" id="delete-yes">${state.group && state.group.role === "member" ? L.leaveGroup : L.deleteYes}</button><button class="btn" type="button" id="delete-no">${L.cancel}</button></div></div>`;
+    return;
+  }
+  if (id === "delete-no") { document.getElementById("delete-slot").innerHTML = ""; return; }
+  if (id === "delete-yes") { removeActivePlan(); renderPlan(true); window.scrollTo(0, 0); return; }
+  if (id === "make-group") {
+    state.group = { id: newId(), role: "leader" }; commit(); renderPlanBar(); renderPlan(true);
+    document.getElementById("toast").textContent = L.groupMade;
+    document.getElementById("fs-group").scrollIntoView({ block: "center" });
+    return;
+  }
+  if (id === "stop-sharing") { state.group = null; commit(); renderPlanBar(); renderPlan(true); document.getElementById("toast").textContent = L.stoppedSharing; return; }
+  if (id === "copy-link") {
+    const input = document.getElementById("invite-link");
+    const done = ok => { document.getElementById("toast").textContent = ok ? L.copied : L.copyFailed; if (!ok) { input.focus(); input.select(); } };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(input.value).then(() => done(true), () => done(false));
+    else done(false);
+    return;
+  }
+  if (id === "share-link") {
+    navigator.share({ title: planLabel(state), text: L.shareText(planLabel(state)), url: inviteLink(state) }).catch(() => {});
+    return;
+  }
   if (e.target.id === "confirm-new") { applyPlan(true); return; }
   if (e.target.id === "confirm-cancel") { document.getElementById("confirm-slot").innerHTML = ""; return; }
 });
@@ -725,7 +1078,7 @@ function applyPlan(reset) {
   state.settings = normalize({ settings: draft }).settings;
   if (reset) state.done = "";
   commit();
-  ui.dirty = false; ui.day = null; ui.monthKey = null; draft = null;
+  ui.dirty = false; ui.day = null; ui.monthKey = null; ui.weekKey = null; draft = null;
   renderPlan(true);
   document.getElementById("toast").textContent = reset ? L.newSaved : L.saved;
 }
@@ -733,7 +1086,7 @@ function applyPlan(reset) {
 /* ---------- backup ---------- */
 let pendingRestore = null;
 function backupBlob() {
-  const body = { app: "lamp-and-path", version: 1, savedAt: new Date().toISOString(), settings: state.settings, done: state.done };
+  const body = { app: "lamp-and-path", version: 2, savedAt: new Date().toISOString(), activeId: store.activeId, plans: store.plans };
   return new Blob([JSON.stringify(body, null, 1)], { type: "application/json" });
 }
 async function saveBackup() {
@@ -759,14 +1112,25 @@ function readBackup(file) {
   reader.onload = () => {
     let raw;
     try { raw = JSON.parse(reader.result); } catch (e) { raw = null; }
-    if (!raw || raw.app !== "lamp-and-path" || !raw.settings) {
+    const all = raw && raw.app === "lamp-and-path" && Array.isArray(raw.plans) && raw.plans.length;
+    if (!raw || raw.app !== "lamp-and-path" || (!all && !raw.settings)) {
       slot.innerHTML = `<div class="confirm" role="alert"><p>${L.notBackup}</p></div>`;
       return;
     }
-    pendingRestore = normalize(raw);
-    const ticks = pendingRestore.done.replace(/0/g, "").length;
+    const ticksOf = p => p.done.replace(/0/g, "").length;
     const when = raw.savedAt ? new Date(raw.savedAt).toLocaleDateString(L.locale, { day: "numeric", month: "long", year: "numeric" }) : L.earlier;
-    slot.innerHTML = `<div class="confirm" role="alert"><p>${L.restoreSummary(esc(when), esc(fmt.longY.format(numToDate(dayNum(pendingRestore.settings.start)))), ticks)}</p>
+    let summary;
+    if (all) {
+      // a v2 backup replaces every plan; a v1 backup (one plan) replaces only the plan that is open
+      const plans = raw.plans.map(normalizePlan);
+      pendingRestore = { plans, activeId: plans.some(p => p.id === raw.activeId) ? raw.activeId : plans[0].id };
+      summary = L.restoreSummaryAll(esc(when), plans.length, plans.reduce((n, p) => n + ticksOf(p), 0));
+    } else {
+      const one = normalize(raw);
+      pendingRestore = { one };
+      summary = L.restoreSummary(esc(when), esc(fmt.longY.format(numToDate(dayNum(one.settings.start)))), ticksOf(one));
+    }
+    slot.innerHTML = `<div class="confirm" role="alert"><p>${summary}</p>
       <div class="actions"><button class="btn primary" type="button" id="restore-yes">${L.replace}</button><button class="btn" type="button" id="restore-no">${L.cancel}</button></div></div>`;
   };
   reader.readAsText(file);
@@ -778,9 +1142,11 @@ planView.addEventListener("click", e => {
   if (e.target.id === "backup-save") { saveBackup(); return; }
   if (e.target.id === "restore-no") { pendingRestore = null; document.getElementById("backup-slot").innerHTML = ""; return; }
   if (e.target.id === "restore-yes" && pendingRestore) {
-    state = pendingRestore; pendingRestore = null;
-    commit();
-    ui.dirty = false; ui.day = null; ui.monthKey = null; draft = null;
+    if (pendingRestore.one) { state.settings = pendingRestore.one.settings; state.done = pendingRestore.one.done; }
+    else { store = { plans: pendingRestore.plans, activeId: pendingRestore.activeId }; state = store.plans.find(p => p.id === store.activeId); }
+    pendingRestore = null;
+    commit(); renderPlanBar();
+    ui.dirty = false; ui.day = null; ui.monthKey = null; ui.weekKey = null; draft = null;
     renderPlan(true);
     document.getElementById("toast").textContent = L.restored;
   }
@@ -847,12 +1213,16 @@ function setupPWA() {
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState !== "visible") return;
   const t = todayISO();
-  if (t !== lastToday) { lastToday = t; ui.day = null; ui.monthKey = null; if (ui.tab !== "plan") renderAll(); }
+  if (t !== lastToday) { lastToday = t; ui.day = null; ui.monthKey = null; ui.weekKey = null; if (ui.tab !== "plan") renderAll(); }
 });
 
 // keep "today" fresh if the page stays open past midnight
 let lastToday = todayISO();
 setInterval(() => { const t = todayISO(); if (t !== lastToday) { lastToday = t; ui.day = null; if (ui.tab !== "plan") renderAll(); } }, 60000);
 
-showTab(ui.tab);
+ui.invite = parseInvite(location.hash);
+window.addEventListener("hashchange", () => { const inv = parseInvite(location.hash); if (inv) { ui.invite = inv; renderJoin(); showTab("today"); window.scrollTo(0, 0); } });
+renderPlanBar();
+renderJoin();
+showTab(ui.invite ? "today" : ui.tab);
 setupPWA();

@@ -1,5 +1,5 @@
 // Le Sentier service worker: keeps the whole app on the device so it opens offline.
-const VERSION = "le-sentier-3";
+const VERSION = "le-sentier-6";
 const SHELL = [
   "/", "/app.js", "/manifest.webmanifest",
   "/icons/icon-192.png", "/icons/icon.svg", "/icons/icon-maskable.svg", "/icons/apple-touch-icon.png", "/icons/favicon-64.png"

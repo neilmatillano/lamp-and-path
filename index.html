@@ -195,6 +195,25 @@ header.top .topctl { grid-area: ctl; }
 .sched .open { border: 0; background: none; padding: 0; color: inherit; text-align: left; }
 .sched .open:hover b { text-decoration: underline; }
 
+/* week / month switch, and the week's seven-day strip */
+.seg { display: inline-flex; justify-self: start; background: var(--chip); border-radius: 999px; padding: 3px; gap: 2px; }
+.seg button { border: 0; background: none; border-radius: 999px; padding: 6px 16px; font-weight: 600; font-size: 0.9rem; color: var(--muted); }
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--leaf); color: var(--ink); box-shadow: 0 1px 2px rgba(0, 0, 0, .12); }
+.weekhead { display: grid; gap: 8px; }
+.weekstrip { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.wday > button, .wday > span { width: 100%; display: grid; justify-items: center; gap: 2px; padding: 8px 0 9px; border: 0; border-radius: var(--r); background: var(--leaf); color: var(--ink); }
+.wday .dow { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.wday .dn { font-family: var(--display); font-weight: 700; font-size: 1.15rem; line-height: 1.2; }
+.wday .dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--muted); margin-top: 2px; }
+.wday.done .dot { background: var(--brand); border-color: var(--brand); }
+.wday.part .dot { border-color: var(--brand); background: linear-gradient(90deg, var(--brand) 50%, transparent 50%); }
+.wday.out > span { background: none; opacity: .45; }
+.wday.out .dot { visibility: hidden; }
+.wday.today > button { box-shadow: inset 0 0 0 2px var(--rubric); }
+.wday.today .dn { color: var(--rubric); }
+.wday > button:hover { background: var(--chip); }
+
 /* plan form */
 form.plan { display: grid; gap: 22px; }
 fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 10px; min-width: 0; }
@@ -246,6 +265,41 @@ footer.foot p { margin: 0; }
 .banner { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; background: var(--leaf); border: 1px solid var(--rule); border-radius: var(--r); padding: 10px 12px 10px 16px; font-size: 0.95rem; }
 .banner p { margin: 0; }
 @media (display-mode: standalone) { .browser-only { display: none !important; } }
+
+/* plans: a row of chips under the masthead, one per plan */
+.planbar { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-top: -6px; padding-block: 2px; }
+.planbar::-webkit-scrollbar { display: none; }
+.planchip {
+  flex: none; display: inline-flex; align-items: center; gap: 6px; max-width: 15rem;
+  border: 1px solid var(--rule); background: var(--leaf); color: var(--muted);
+  border-radius: 999px; padding: 6px 13px; font-weight: 600; font-size: 0.88rem; white-space: nowrap;
+}
+.planchip span { overflow: hidden; text-overflow: ellipsis; }
+.planchip svg { width: 15px; height: 15px; flex: none; }
+.planchip:hover { color: var(--ink); }
+.planchip[aria-pressed="true"] { border-color: var(--brand); color: var(--ink); box-shadow: inset 0 0 0 1px var(--brand); }
+.planchip[aria-pressed="true"] svg { color: var(--brand); }
+.planchip.add { background: none; border-style: dashed; }
+.btn svg { width: 16px; height: 16px; flex: none; }
+
+/* invite card, shown when the app opens from a group link */
+.join { background: var(--leaf); border: 1.5px solid var(--brand); border-radius: var(--r-lg); padding: 18px 20px; display: grid; gap: 8px; }
+.join .eyebrow { color: var(--brand); display: flex; align-items: center; gap: 6px; }
+.join .eyebrow svg { width: 15px; height: 15px; }
+.join h2 { font-family: var(--display); font-weight: 700; font-size: 1.55rem; line-height: 1.2; letter-spacing: -0.01em; margin: 0; text-wrap: balance; overflow-wrap: anywhere; }
+.join p { margin: 0; }
+.join .actions { margin-top: 4px; }
+
+input[type="text"] { background: var(--leaf); border: 1px solid var(--rule); border-radius: 8px; padding: 8px 10px; min-height: 42px; max-width: 100%; width: 22rem; }
+.linkrow { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.linkrow input { flex: 1 1 14rem; width: auto; min-width: 0; }
+.linkrow .error { flex-basis: 100%; color: var(--rubric); }
+.linkrow .error:empty { display: none; }
+#invite-link { font-size: 0.85rem; color: var(--muted); }
+.hint.locked { display: flex; gap: 8px; align-items: flex-start; color: var(--ink); background: var(--chip); border-radius: var(--r); padding: 10px 12px; }
+.hint.locked svg { width: 16px; height: 16px; flex: none; margin-top: 2px; color: var(--brand); }
+fieldset:disabled { opacity: .55; }
+.btn.danger { color: var(--rubric); }
 </style>
 </head>
 <body>
@@ -264,6 +318,9 @@ footer.foot p { margin: 0; }
   </header>
   <div class="banner" id="update-banner" hidden role="status"><p id="update-text">A new version of Le Sentier is ready.</p><button class="btn primary" type="button" id="update-now">Reload</button></div>
   <div class="banner browser-only" id="install-banner" hidden><p id="install-text">Install Le Sentier to open it like an app, even offline.</p><span class="actions"><button class="btn primary" type="button" id="install-now">Install</button><button class="btn quiet" type="button" id="install-later">Not now</button></span></div>
+
+  <nav class="planbar" id="planbar" aria-label="Your plans"></nav>
+  <div id="join-slot" hidden></div>
 
   <main id="main" style="display:contents">
   <section id="view-today" style="display:grid;gap:22px"></section>
